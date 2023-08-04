@@ -29,8 +29,11 @@ public:
 
     void on_tabWidget_tabCloseRequested(int index);
 
+    void on_actionSave_file_triggered();
+
+    void on_actionSave_as_triggered();
+
 private:
     Ui::MainWindow *ui;
-    QString currentFile;
 };
 #endif // MAINWINDOW_H

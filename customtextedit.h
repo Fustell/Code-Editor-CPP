@@ -14,9 +14,19 @@ class CustomTextEdit : public QWidget
 public:
     explicit CustomTextEdit(QWidget *parent = nullptr);
     ~CustomTextEdit();
+    QString GetCurrentFile() const
+    {
+        return this->currentFile;
+    }
+    void SetCurrentFile(QString file)
+    {
+        this->currentFile = file;
+    }
+
 
 private:
     Ui::CustomTextEdit *ui;
+    QString currentFile;
 };
 
 #endif // CUSTOMTEXTEDIT_H
