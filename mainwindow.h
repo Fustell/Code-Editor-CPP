@@ -25,6 +25,10 @@ public:
 
     void on_actionOpen_file_triggered();
 
+    void on_actionNew_file_triggered();
+
+    void on_tabWidget_tabCloseRequested(int index);
+
 private:
     Ui::MainWindow *ui;
     QString currentFile;
