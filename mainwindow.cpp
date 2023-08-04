@@ -6,14 +6,15 @@
 #include "./customtextedit.h"
 
 #define tabBar ui->tabWidget
+#define programName "IDE C++"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-    CustomTextEdit *customTextEdit = new CustomTextEdit();
+    this->setCentralWidget(ui->tabWidget);
+    setWindowTitle(programName);
     ui->tabWidget->removeTab(0);
 }
 
@@ -39,7 +40,6 @@ void MainWindow::on_actionOpen_file_triggered()
         return;
     }
 
-    setWindowTitle(fileName);
     QTextStream in(&file);
     QString text = in.readAll();
 
