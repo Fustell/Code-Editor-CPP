@@ -136,4 +136,3 @@ void MainWindow::on_actionSave_as_triggered()
     out << text;
     file.close();
 }
-

@@ -2,6 +2,9 @@
 #define CUSTOMTEXTEDIT_H
 
 #include <QWidget>
+#include <QFont>
+
+#include "highlighter.h"
 
 namespace Ui {
 class CustomTextEdit;
@@ -25,8 +28,12 @@ public:
 
 
 private:
+    void setupEditor();
+
     Ui::CustomTextEdit *ui;
     QString currentFile;
+    Highlighter *highlighter;
+
 };
 
 #endif // CUSTOMTEXTEDIT_H
