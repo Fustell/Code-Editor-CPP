@@ -1,6 +1,10 @@
 #include "customtextedit.h"
 #include "ui_customtextedit.h"
 
+#include <QCompleter>
+#include <QLineEdit>
+#include <QStringListModel>
+
 CustomTextEdit::CustomTextEdit(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::CustomTextEdit)
@@ -15,8 +19,7 @@ CustomTextEdit::~CustomTextEdit()
 }
 
 void CustomTextEdit::setupEditor()
-{/*
-   this->ui->textEdit->setCurrentFont(serifFont);*/
+{
     QFont serifFont("Times", 10, QFont::Bold);
     ui->textEdit->setFont(serifFont);
 

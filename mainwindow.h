@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QFile>
 #include <QFileDialog>
+#include <QProcess>
 
 
 
@@ -33,7 +34,10 @@ public:
 
     void on_actionSave_as_triggered();
 
+    void on_actionBuild_triggered();
+
 private:
     Ui::MainWindow *ui;
+    QProcess compilerProcess;
 };
 #endif // MAINWINDOW_H

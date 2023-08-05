@@ -52,7 +52,14 @@
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
+   <widget class="QMenu" name="menuBuild">
+    <property name="title">
+     <string>Build</string>
+    </property>
+    <addaction name="actionBuild"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuBuild"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionNew_file">
@@ -78,6 +85,11 @@
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionBuild">
+   <property name="text">
+    <string>Build</string>
    </property>
   </action>
  </widget>

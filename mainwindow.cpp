@@ -1,6 +1,7 @@
 #include <QTextEdit>
 #include <QDir>
 #include <QMessageBox>
+#include <QProcess>
 
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
@@ -23,6 +24,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(saveAction, SIGNAL(triggered()), this, SLOT(on_actionSave_file_triggered()));
     this->addAction(saveAction);
+
+    compilerProcess.setProcessChannelMode(QProcess::MergedChannels);
 }
 
 MainWindow::~MainWindow()
@@ -136,3 +139,33 @@ void MainWindow::on_actionSave_as_triggered()
     out << text;
     file.close();
 }
+
+void MainWindow::on_actionBuild_triggered()
+{
+    CustomTextEdit *currentTab = static_cast<CustomTextEdit*>(tabBar->currentWidget());
+
+    QFile file(currentTab->GetCurrentFile());
+    QFileInfo fileInfo(file.fileName());
+
+    QStringList arguments;
+    QString outputFilePath = fileInfo.absolutePath() + "\\"+fileInfo.baseName()+".exe";
+    arguments << "-o" << outputFilePath << currentTab->GetCurrentFile();
+
+    QProcess process;
+    process.start("g++", arguments);
+    process.waitForStarted();
+    process.waitForFinished();
+
+    QString output = process.readAllStandardOutput();
+    QString errorOutput = process.readAllStandardError();
+
+    qDebug() << output;
+
+    if (process.exitCode() == 0) {
+        qDebug() << "Compilation successful!";
+    } else {
+        qWarning() << "Compilation failed!";
+        qDebug() << "Error output:\n" << errorOutput;
+    }
+}
+
