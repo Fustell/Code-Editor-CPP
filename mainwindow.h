@@ -5,6 +5,13 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QProcess>
+#include <QTextEdit>
+#include <QDir>
+#include <QMessageBox>
+#include <QProcess>
+#include <QStyleFactory>
+#include <QFileSystemModel>
+
 
 
 
@@ -39,5 +46,6 @@ public:
 private:
     Ui::MainWindow *ui;
     QProcess compilerProcess;
+    QFileSystemModel *fileModel;
 };
 #endif // MAINWINDOW_H

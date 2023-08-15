@@ -1,11 +1,7 @@
-#include <QTextEdit>
-#include <QDir>
-#include <QMessageBox>
-#include <QProcess>
-
 #include "mainwindow.h"
-#include "./ui_mainwindow.h"
-#include "./customtextedit.h"
+#include "ui_mainwindow.h"
+#include "customtextedit.h"
+#include "fileexplorer.h"
 
 #define tabBar ui->tabWidget
 #define programName "IDE C++"
@@ -15,9 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    this->setCentralWidget(ui->tabWidget);
     setWindowTitle(programName);
-    ui->tabWidget->removeTab(0);
 
     QAction *saveAction = new QAction(this);
     saveAction->setShortcut(Qt::Key_S | Qt::CTRL);
@@ -26,6 +20,10 @@ MainWindow::MainWindow(QWidget *parent)
     this->addAction(saveAction);
 
     compilerProcess.setProcessChannelMode(QProcess::MergedChannels);
+
+    qApp->setStyle(QStyleFactory::create("Fusion"));
+    QFont countryNewFont("Country New", 8);
+    ui->commandPrompt->setFont(countryNewFont);
 }
 
 MainWindow::~MainWindow()
@@ -38,9 +36,9 @@ void MainWindow::on_actionExit_triggered()
     this->close();
 }
 
-
 void MainWindow::on_actionOpen_file_triggered()
 {
+
     QString fileName = QFileDialog::getOpenFileName(this, "Open file",QDir::homePath());
     QFile file(fileName);
 
@@ -63,6 +61,17 @@ void MainWindow::on_actionOpen_file_triggered()
     QTextEdit* tabTextEdit =tabBar->currentWidget()->findChild<QTextEdit*>();
     tabTextEdit->setText(text);
     file.close();
+
+
+    QString absolutPath = fileInfo.absoluteDir().absolutePath();
+
+    auto layout = new QVBoxLayout();
+    FileExplorer* fileExplorer = new FileExplorer();
+    fileExplorer->SetUpDir(absolutPath);
+
+    layout->addWidget(fileExplorer);
+    ui->fileExplorerFrame->setLayout(layout);
+
 }
 
 
@@ -142,30 +151,50 @@ void MainWindow::on_actionSave_as_triggered()
 
 void MainWindow::on_actionBuild_triggered()
 {
+    ui->commandPrompt->clear();
     CustomTextEdit *currentTab = static_cast<CustomTextEdit*>(tabBar->currentWidget());
 
     QFile file(currentTab->GetCurrentFile());
     QFileInfo fileInfo(file.fileName());
 
     QStringList arguments;
-    QString outputFilePath = fileInfo.absolutePath() + "\\"+fileInfo.baseName()+".exe";
+    QString outputFilePath = fileInfo.absolutePath() + "/" + fileInfo.baseName() + ".exe";
     arguments << "-o" << outputFilePath << currentTab->GetCurrentFile();
+    arguments << "-v";
 
     QProcess process;
+    process.setProcessChannelMode(QProcess::MergedChannels);
+
+    connect(&process, &QProcess::readyReadStandardOutput, [this, &process]() {
+        QString output = process.readAllStandardOutput();
+        ui->commandPrompt->moveCursor(QTextCursor::End);
+        ui->commandPrompt->insertPlainText(output);
+        ui->commandPrompt->moveCursor(QTextCursor::End);
+    });
+
+    connect(&process, &QProcess::readyReadStandardError, [this, &process]() {
+        QString errorOutput = process.readAllStandardError();
+        ui->commandPrompt->moveCursor(QTextCursor::End);
+        ui->commandPrompt->insertPlainText(errorOutput);
+        ui->commandPrompt->moveCursor(QTextCursor::End);
+    });
+
     process.start("g++", arguments);
     process.waitForStarted();
+
+    while (process.state() == QProcess::Running) {
+        QCoreApplication::processEvents(); // Process pending events to update the UI
+    }
+
     process.waitForFinished();
 
     QString output = process.readAllStandardOutput();
     QString errorOutput = process.readAllStandardError();
 
-    qDebug() << output;
-
     if (process.exitCode() == 0) {
-        qDebug() << "Compilation successful!";
+        ui->commandPrompt->appendPlainText("Compilation successful!\n");
     } else {
-        qWarning() << "Compilation failed!";
-        qDebug() << "Error output:\n" << errorOutput;
+        ui->commandPrompt->appendPlainText("Compilation failed!\n");
     }
 }
 

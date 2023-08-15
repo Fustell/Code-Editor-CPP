@@ -5,7 +5,7 @@ Highlighter::Highlighter(QTextDocument *parent)
 {
     HighlightingRule rule;
 
-    keywordFormat.setForeground(Qt::darkBlue);
+    keywordFormat.setForeground(QColor(0,145,255,255));
     keywordFormat.setFontWeight(QFont::Bold);
     const QString keywordPatterns[] = {
         QStringLiteral("\\bchar\\b"), QStringLiteral("\\bclass\\b"), QStringLiteral("\\bconst\\b"),
@@ -31,13 +31,13 @@ Highlighter::Highlighter(QTextDocument *parent)
     rule.format = classFormat;
     highlightingRules.append(rule);
 
-    quotationFormat.setForeground(Qt::darkGreen);
+    quotationFormat.setForeground(QColor(255,145,0,255));
     rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
     rule.format = quotationFormat;
     highlightingRules.append(rule);
 
-    functionFormat.setFontItalic(true);
-    functionFormat.setForeground(Qt::blue);
+//    functionFormat.setFontItalic(true);
+    functionFormat.setForeground(QColor(255,0,191));
     rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+(?=\\()"));
     rule.format = functionFormat;
     highlightingRules.append(rule);

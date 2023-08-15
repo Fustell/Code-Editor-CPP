@@ -25,8 +25,6 @@ public:
     {
         this->currentFile = file;
     }
-
-
 private:
     void setupEditor();
 

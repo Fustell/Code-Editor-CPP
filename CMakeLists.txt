@@ -25,6 +25,10 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         customtextedit.h customtextedit.cpp customtextedit.ui
         highlighter.h highlighter.cpp
+        fileexplorer.h fileexplorer.cpp
+
+
+
 
     )
 # Define target properties for Android with Qt 6 as:
