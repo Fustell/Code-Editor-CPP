@@ -2,6 +2,7 @@
 #include <QTextEdit>
 
 #include "fileexplorer.h"
+#include "customtextedit.h"
 #include "ui_fileexplorer.h"
 
 void FileExplorer::updateFileTree() {
@@ -53,6 +54,8 @@ void FileExplorer::SetUpDir(QString absolutPath)
 void FileExplorer::openFile(QTreeWidgetItem *item, int column) {
     QString filePath = item->data(0, Qt::UserRole).toString();
     QFileInfo fileInfo(filePath);
+    QFile file(filePath);
+    QString filename(fileInfo.fileName());
 
     if (fileInfo.isFile()) {
         QFile file(filePath);
@@ -61,10 +64,14 @@ void FileExplorer::openFile(QTreeWidgetItem *item, int column) {
             file.close();
             QTabWidget *tabWidget = parentWidget()->parentWidget()->findChild<QTabWidget*>();
             if (tabWidget) {
-                QTextEdit *textEdit = new QTextEdit;
-                textEdit->setPlainText(fileContent);
-                tabWidget->addTab(textEdit, fileInfo.fileName());
-                tabWidget->setCurrentWidget(textEdit);
+                CustomTextEdit* newTab = new CustomTextEdit();
+                tabWidget->addTab(newTab, filename);
+                tabWidget->setCurrentIndex(tabWidget->count()-1);
+
+                newTab->SetCurrentFile(filePath);
+
+                QTextEdit* tabTextEdit =tabWidget->currentWidget()->findChild<QTextEdit*>();
+                tabTextEdit->setText(fileContent);
             }
         }
     } else if (fileInfo.isDir()) {
