@@ -16,6 +16,7 @@ class FileExplorer : public QWidget
 public:
     explicit FileExplorer(QWidget *parent = nullptr);
     void SetUpDir(QString absolutPath);
+    void openFile(QTreeWidgetItem *item, int column);
 
 private slots:
     void updateFileTree();

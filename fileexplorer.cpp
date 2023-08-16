@@ -1,4 +1,5 @@
 #include <QMessageBox>
+#include <QTextEdit>
 
 #include "fileexplorer.h"
 #include "ui_fileexplorer.h"
@@ -15,10 +16,11 @@ void FileExplorer::updateFileTree() {
             QString fileExtention = fileInfo.suffix().toLower();
 
             if(fileExtention == "txt") item->setIcon(0, QIcon(":/icons/txt.png"));
-            if(fileExtention == "hpp") item->setIcon(0, QIcon(":/icons/hpp.png"));
-            if(fileExtention == "h") item->setIcon(0, QIcon(":/icons/h.png"));
-            if(fileExtention == "c") item->setIcon(0, QIcon(":/icons/c.png"));
-            if(fileExtention == "cpp") item->setIcon(0, QIcon(":/icons/cpp.png"));
+            else if(fileExtention == "cpp") item->setIcon(0, QIcon(":/icons/cpp.png"));
+            else if(fileExtention == "c") item->setIcon(0, QIcon(":/icons/c.png"));
+            else if(fileExtention == "hpp") item->setIcon(0, QIcon(":/icons/hpp.png"));
+            else if(fileExtention == "h") item->setIcon(0, QIcon(":/icons/h.png"));
+            else item->setIcon(0, QIcon(":/icons/empty.png"));
 
         }
         if (fileInfo.isDir()) {
@@ -45,5 +47,29 @@ void FileExplorer::SetUpDir(QString absolutPath)
 
     updateFileTree();
 
+    connect(fileTreeWidget, &QTreeWidget::itemDoubleClicked, this, &FileExplorer::openFile);
+}
+
+void FileExplorer::openFile(QTreeWidgetItem *item, int column) {
+    QString filePath = item->data(0, Qt::UserRole).toString();
+    QFileInfo fileInfo(filePath);
+
+    if (fileInfo.isFile()) {
+        QFile file(filePath);
+        if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QString fileContent = QString::fromUtf8(file.readAll());
+            file.close();
+            QTabWidget *tabWidget = parentWidget()->parentWidget()->findChild<QTabWidget*>();
+            if (tabWidget) {
+                QTextEdit *textEdit = new QTextEdit;
+                textEdit->setPlainText(fileContent);
+                tabWidget->addTab(textEdit, fileInfo.fileName());
+                tabWidget->setCurrentWidget(textEdit);
+            }
+        }
+    } else if (fileInfo.isDir()) {
+        currentDirectory.cd(fileInfo.fileName());
+        updateFileTree();
+    }
 }
 
