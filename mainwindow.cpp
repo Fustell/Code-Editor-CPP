@@ -69,6 +69,8 @@ void MainWindow::on_actionOpen_file_triggered()
     FileExplorer* fileExplorer = new FileExplorer();
     fileExplorer->SetUpDir(absolutPath);
 
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
     layout->addWidget(fileExplorer);
     ui->fileExplorerFrame->setLayout(layout);
 

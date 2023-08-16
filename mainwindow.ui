@@ -13,6 +13,11 @@
   <property name="windowTitle">
    <string>Simple IDE</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QSplitter::handle {
+    background-color: #333;
+}</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>

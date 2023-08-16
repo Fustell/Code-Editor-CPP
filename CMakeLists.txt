@@ -26,6 +26,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         customtextedit.h customtextedit.cpp customtextedit.ui
         highlighter.h highlighter.cpp
         fileexplorer.h fileexplorer.cpp
+        icons.qrc
 
 
 
