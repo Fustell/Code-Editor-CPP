@@ -1,10 +1,6 @@
 #include "customtextedit.h"
 #include "ui_customtextedit.h"
 
-#include <QCompleter>
-#include <QLineEdit>
-#include <QStringListModel>
-
 CustomTextEdit::CustomTextEdit(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::CustomTextEdit)

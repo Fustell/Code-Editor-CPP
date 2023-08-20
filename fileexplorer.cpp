@@ -1,6 +1,3 @@
-#include <QMessageBox>
-#include <QTextEdit>
-
 #include "fileexplorer.h"
 #include "customtextedit.h"
 #include "ui_fileexplorer.h"
@@ -33,6 +30,22 @@ void FileExplorer::updateFileTree() {
 FileExplorer::FileExplorer(QWidget *parent) : QWidget(parent) {
     };
 
+void FileExplorer::openPreviousFileTree()
+{
+    historyNav.push(currentDirectory);
+    currentDirectory.cd("../");
+    updateFileTree();
+}
+void FileExplorer::openNextFileTree()
+{
+    if(!historyNav.empty())
+    {
+        currentDirectory.cd(historyNav.top().absolutePath());
+        historyNav.pop();
+        updateFileTree();
+    }
+}
+
 void FileExplorer::SetUpDir(QString absolutPath)
 {
     this->currentDirectory = QDir(absolutPath);
@@ -41,6 +54,21 @@ void FileExplorer::SetUpDir(QString absolutPath)
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
 
+    QHBoxLayout *buttonsLayout = new QHBoxLayout(this);
+
+    backspace = new QPushButton(this);
+    backspace->setText("<-");
+    buttonsLayout->addWidget((backspace));
+
+    connect(backspace, &QPushButton::clicked, this, &FileExplorer::openPreviousFileTree);
+
+    forwardspace = new QPushButton(this);
+    forwardspace->setText("->");
+    buttonsLayout->addWidget((forwardspace));
+
+    connect(forwardspace, &QPushButton::clicked, this, &FileExplorer::openNextFileTree);
+
+    layout->addLayout(buttonsLayout);
     fileTreeWidget = new QTreeWidget(this);
     layout->addWidget(fileTreeWidget);
 

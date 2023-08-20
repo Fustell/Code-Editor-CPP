@@ -3,6 +3,9 @@
 
 #include <QWidget>
 #include <QFont>
+#include <QCompleter>
+#include <QLineEdit>
+#include <QStringListModel>
 
 #include "highlighter.h"
 
