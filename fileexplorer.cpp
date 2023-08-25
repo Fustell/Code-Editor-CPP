@@ -4,6 +4,8 @@
 
 void FileExplorer::updateFileTree() {
     fileTreeWidget->clear();
+    path->setText(currentDirectory.absolutePath());
+
     QFileInfoList fileInfoList = currentDirectory.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
 
     for (const QFileInfo &fileInfo : fileInfoList) {
@@ -65,6 +67,9 @@ void FileExplorer::SetUpDir(QString absolutPath)
     forwardspace = new QPushButton(this);
     forwardspace->setText("->");
     buttonsLayout->addWidget((forwardspace));
+
+    path = new QLabel(this);
+    layout->addWidget(path);
 
     connect(forwardspace, &QPushButton::clicked, this, &FileExplorer::openNextFileTree);
 

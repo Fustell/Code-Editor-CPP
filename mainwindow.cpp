@@ -22,8 +22,6 @@ MainWindow::MainWindow(QWidget *parent)
     compilerProcess.setProcessChannelMode(QProcess::MergedChannels);
 
     qApp->setStyle(QStyleFactory::create("Fusion"));
-    QFont countryNewFont("Country New", 8);
-    ui->commandPrompt->setFont(countryNewFont);
 }
 
 MainWindow::~MainWindow()
@@ -156,11 +154,13 @@ void MainWindow::on_actionBuild_triggered()
     ui->commandPrompt->clear();
     CustomTextEdit *currentTab = static_cast<CustomTextEdit*>(tabBar->currentWidget());
 
+    if(currentTab == nullptr) return;
+
     QFile file(currentTab->GetCurrentFile());
     QFileInfo fileInfo(file.fileName());
 
     QStringList arguments;
-    QString outputFilePath = fileInfo.absolutePath() + "/" + fileInfo.baseName() + ".exe";
+    QString outputFilePath = fileInfo.absolutePath() + "/" + fileInfo.baseName();
     arguments << "-o" << outputFilePath << currentTab->GetCurrentFile();
     arguments << "-v";
 
@@ -198,5 +198,6 @@ void MainWindow::on_actionBuild_triggered()
     } else {
         ui->commandPrompt->appendPlainText("Compilation failed!\n");
     }
+    ui->commandPrompt->moveCursor(QTextCursor::End);
 }
 

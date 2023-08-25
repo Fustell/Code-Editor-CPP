@@ -7,6 +7,7 @@
 #include <QTextEdit>
 #include <QPushButton>
 #include <QStack>
+#include <QLabel>
 
 namespace Ui {
 class FileExplorer;
@@ -33,6 +34,7 @@ private:
     QPushButton *backspace;
     QPushButton *forwardspace;
     QStack<QDir> historyNav;
+    QLabel *path;
 };
 
 #endif // FILEEXPLORER_H
