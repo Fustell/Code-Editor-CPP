@@ -16,8 +16,14 @@ MainWindow::MainWindow(QWidget *parent)
     QAction *saveAction = new QAction(this);
     saveAction->setShortcut(Qt::Key_S | Qt::CTRL);
 
+    QAction *buildAction = new QAction(this);
+    buildAction->setShortcut(Qt::Key_F5);
+
     connect(saveAction, SIGNAL(triggered()), this, SLOT(on_actionSave_file_triggered()));
-    this->addAction(saveAction);
+    connect(buildAction, SIGNAL(triggered()), this, SLOT(on_actionBuild_triggered()));
+
+    QList<QAction*> *actionsCollection = new QList<QAction*>{saveAction, buildAction};
+    this->addActions(*actionsCollection);
 
     compilerProcess.setProcessChannelMode(QProcess::MergedChannels);
 
@@ -51,13 +57,12 @@ void MainWindow::on_actionOpen_file_triggered()
     QString filename(fileInfo.fileName());
 
     CodeEditor* newTab = new CodeEditor();
+    newTab->setPlainText(text);
+
     tabBar->addTab(newTab, filename);
     tabBar->setCurrentIndex(tabBar->count()-1);
 
     newTab->SetCurrentFile(fileName);
-
-    QTextEdit* tabTextEdit =tabBar->currentWidget()->findChild<QTextEdit*>();
-    tabTextEdit->setText(text);
     file.close();
 
 
@@ -92,12 +97,11 @@ void MainWindow::on_tabWidget_tabCloseRequested(int index)
 
 void MainWindow::on_actionSave_file_triggered()
 {
-    CodeEditor *currentTab = static_cast<CodeEditor*>(tabBar->currentWidget());
+    CodeEditor *currentEditorTab = static_cast<CodeEditor*>(tabBar->currentWidget());
 
-    if(currentTab == nullptr) return;
+    if(currentEditorTab == nullptr) return;
 
-    QTextEdit *currentTextEdit =  tabBar->currentWidget()->findChild<QTextEdit*>();
-    QString filePath = currentTab->GetCurrentFile();
+    QString filePath = currentEditorTab->GetCurrentFile();
 
     if(filePath.isEmpty())
     {
@@ -106,7 +110,7 @@ void MainWindow::on_actionSave_file_triggered()
         QFileInfo fileInfo(file.fileName());
         QString filename(fileInfo.fileName());
 
-        currentTab->SetCurrentFile(filePath);
+        currentEditorTab->SetCurrentFile(filePath);
         tabBar->setTabText(tabBar->currentIndex(), filename);
     }
 
@@ -119,7 +123,7 @@ void MainWindow::on_actionSave_file_triggered()
     }
 
     QTextStream out(&file);
-    QString text = currentTextEdit->toPlainText();
+    QString text = currentEditorTab->toPlainText();
 
     out << text;
     file.close();
@@ -129,9 +133,9 @@ void MainWindow::on_actionSave_file_triggered()
 void MainWindow::on_actionSave_as_triggered()
 {
 
-    CodeEditor *currentTab = static_cast<CodeEditor*>(tabBar->currentWidget());
+    CodeEditor *currentEditorTab = static_cast<CodeEditor*>(tabBar->currentWidget());
 
-    QTextEdit *currentTextEdit = tabBar->findChild<QTextEdit*>();
+
     QString filePath = QFileDialog::getSaveFileName(this, "Save",QDir::homePath());
     QFile file(filePath);
 
@@ -141,9 +145,9 @@ void MainWindow::on_actionSave_as_triggered()
         return;
     }
 
-    currentTab->SetCurrentFile(filePath);
+    currentEditorTab->SetCurrentFile(filePath);
     QTextStream out(&file);
-    QString text = currentTextEdit->toPlainText();
+    QString text = currentEditorTab->toPlainText();
 
     out << text;
     file.close();

@@ -96,16 +96,21 @@ void FileExplorer::openFile(QTreeWidgetItem *item, int column) {
             QString fileContent = QString::fromUtf8(file.readAll());
             file.close();
             QTabWidget *tabWidget = parentWidget()->parentWidget()->findChild<QTabWidget*>();
+
             if (tabWidget == nullptr) return;
 
+            QList<CodeEditor*> codeEditors = tabWidget->findChildren<CodeEditor*>();
+            for(auto& editor: codeEditors)
+            {
+                if (editor->GetCurrentFile() == filePath) return;
+            }
+
             CodeEditor* newTab = new CodeEditor();
+            newTab->setPlainText(fileContent);
             tabWidget->addTab(newTab, filename);
             tabWidget->setCurrentIndex(tabWidget->count()-1);
 
             newTab->SetCurrentFile(filePath);
-
-            QTextEdit* tabTextEdit =tabWidget->currentWidget()->findChild<QTextEdit*>();
-            tabTextEdit->setText(fileContent);
 
         }
     } else if (fileInfo.isDir()) {
