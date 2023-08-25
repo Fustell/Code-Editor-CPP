@@ -1,5 +1,5 @@
-#ifndef CUSTOMTEXTEDIT_H
-#define CUSTOMTEXTEDIT_H
+#ifndef CODEEDITOR_H
+#define CODEEDITOR_H
 
 #include <QWidget>
 #include <QFont>
@@ -10,16 +10,16 @@
 #include "highlighter.h"
 
 namespace Ui {
-class CustomTextEdit;
+class CodeEditor;
 }
 
-class CustomTextEdit : public QWidget
+class CodeEditor : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit CustomTextEdit(QWidget *parent = nullptr);
-    ~CustomTextEdit();
+    explicit CodeEditor(QWidget *parent = nullptr);
+    ~CodeEditor();
     QString GetCurrentFile() const
     {
         return this->currentFile;
@@ -31,10 +31,10 @@ public:
 private:
     void setupEditor();
 
-    Ui::CustomTextEdit *ui;
+    Ui::CodeEditor *ui;
     QString currentFile;
     Highlighter *highlighter;
 
 };
 
-#endif // CUSTOMTEXTEDIT_H
+#endif // CODEEDITOR_H

@@ -1,6 +1,6 @@
 #include "fileexplorer.h"
-#include "customtextedit.h"
-#include "ui_fileexplorer.h"
+#include "codeeditor.h"
+#include "ui_codeeditor.h"
 
 void FileExplorer::updateFileTree() {
     fileTreeWidget->clear();
@@ -96,16 +96,17 @@ void FileExplorer::openFile(QTreeWidgetItem *item, int column) {
             QString fileContent = QString::fromUtf8(file.readAll());
             file.close();
             QTabWidget *tabWidget = parentWidget()->parentWidget()->findChild<QTabWidget*>();
-            if (tabWidget) {
-                CustomTextEdit* newTab = new CustomTextEdit();
-                tabWidget->addTab(newTab, filename);
-                tabWidget->setCurrentIndex(tabWidget->count()-1);
+            if (tabWidget == nullptr) return;
 
-                newTab->SetCurrentFile(filePath);
+            CodeEditor* newTab = new CodeEditor();
+            tabWidget->addTab(newTab, filename);
+            tabWidget->setCurrentIndex(tabWidget->count()-1);
 
-                QTextEdit* tabTextEdit =tabWidget->currentWidget()->findChild<QTextEdit*>();
-                tabTextEdit->setText(fileContent);
-            }
+            newTab->SetCurrentFile(filePath);
+
+            QTextEdit* tabTextEdit =tabWidget->currentWidget()->findChild<QTextEdit*>();
+            tabTextEdit->setText(fileContent);
+
         }
     } else if (fileInfo.isDir()) {
         currentDirectory.cd(fileInfo.fileName());

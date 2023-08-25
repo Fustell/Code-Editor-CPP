@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "customtextedit.h"
+#include "codeeditor.h"
 #include "fileexplorer.h"
 
 #define tabBar ui->tabWidget
@@ -50,7 +50,7 @@ void MainWindow::on_actionOpen_file_triggered()
     QFileInfo fileInfo(file.fileName());
     QString filename(fileInfo.fileName());
 
-    CustomTextEdit* newTab = new CustomTextEdit();
+    CodeEditor* newTab = new CodeEditor();
     tabBar->addTab(newTab, filename);
     tabBar->setCurrentIndex(tabBar->count()-1);
 
@@ -77,7 +77,7 @@ void MainWindow::on_actionOpen_file_triggered()
 
 void MainWindow::on_actionNew_file_triggered()
 {
-    ui->tabWidget->addTab(new CustomTextEdit(), tr("New tab"));
+    ui->tabWidget->addTab(new CodeEditor(), tr("New tab"));
     ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
 }
 
@@ -92,7 +92,7 @@ void MainWindow::on_tabWidget_tabCloseRequested(int index)
 
 void MainWindow::on_actionSave_file_triggered()
 {
-    CustomTextEdit *currentTab = static_cast<CustomTextEdit*>(tabBar->currentWidget());
+    CodeEditor *currentTab = static_cast<CodeEditor*>(tabBar->currentWidget());
 
     if(currentTab == nullptr) return;
 
@@ -129,7 +129,7 @@ void MainWindow::on_actionSave_file_triggered()
 void MainWindow::on_actionSave_as_triggered()
 {
 
-    CustomTextEdit *currentTab = static_cast<CustomTextEdit*>(tabBar->currentWidget());
+    CodeEditor *currentTab = static_cast<CodeEditor*>(tabBar->currentWidget());
 
     QTextEdit *currentTextEdit = tabBar->findChild<QTextEdit*>();
     QString filePath = QFileDialog::getSaveFileName(this, "Save",QDir::homePath());
@@ -152,7 +152,7 @@ void MainWindow::on_actionSave_as_triggered()
 void MainWindow::on_actionBuild_triggered()
 {
     ui->commandPrompt->clear();
-    CustomTextEdit *currentTab = static_cast<CustomTextEdit*>(tabBar->currentWidget());
+    CodeEditor *currentTab = static_cast<CodeEditor*>(tabBar->currentWidget());
 
     if(currentTab == nullptr) return;
 

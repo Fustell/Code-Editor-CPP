@@ -23,7 +23,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(IDE
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        customtextedit.h customtextedit.cpp customtextedit.ui
+        codeeditor.h codeeditor.cpp codeeditor.ui
         highlighter.h highlighter.cpp
         fileexplorer.h fileexplorer.cpp
         icons.qrc

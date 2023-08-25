@@ -1,20 +1,20 @@
-#include "customtextedit.h"
-#include "ui_customtextedit.h"
+#include "codeeditor.h"
+#include "ui_codeeditor.h""
 
-CustomTextEdit::CustomTextEdit(QWidget *parent) :
+CodeEditor::CodeEditor(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::CustomTextEdit)
+    ui(new Ui::CodeEditor)
 {
     ui->setupUi(this);
     setupEditor();
 }
 
-CustomTextEdit::~CustomTextEdit()
+CodeEditor::~CodeEditor()
 {
     delete ui;
 }
 
-void CustomTextEdit::setupEditor()
+void CodeEditor::setupEditor()
 {
     QFont serifFont("Times", 10, QFont::Bold);
     ui->textEdit->setFont(serifFont);
