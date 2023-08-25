@@ -31,6 +31,14 @@ private:
     QTextCharFormat multiLineCommentFormat;
     QTextCharFormat quotationFormat;
     QTextCharFormat functionFormat;
+    QTextCharFormat preprocessorFormat;
+    QTextCharFormat numberFormat;
+    QTextCharFormat namespaceFormat;
+    QTextCharFormat returnFormat;
+    QTextCharFormat arrowOperatorFormat;
+    QTextCharFormat thisAndArrowFormat;
+    QTextCharFormat newDeleteOperatorFormat;
+    QTextCharFormat classNameFormat;
 };
 
 

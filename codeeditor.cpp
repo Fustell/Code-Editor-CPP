@@ -1,6 +1,8 @@
 #include "codeeditor.h"
 #include "ui_codeeditor.h"
 
+#include <QTextOption>
+
 CodeEditor::~CodeEditor()
 {
     delete lineNumberArea;
@@ -8,6 +10,13 @@ CodeEditor::~CodeEditor()
 
 CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 {
+    QTextOption textOption;
+    int tabStopWidth = 25;
+    textOption.setTabStopDistance(tabStopWidth);
+
+    // Apply the QTextOption to the QTextEdit widget
+    this->document()->setDefaultTextOption(textOption);
+
     lineNumberArea = new LineNumberArea(this);
 
     connect(this, &CodeEditor::blockCountChanged, this, &CodeEditor::updateLineNumberAreaWidth);
