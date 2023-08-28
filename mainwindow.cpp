@@ -198,9 +198,9 @@ void MainWindow::on_actionBuild_triggered()
     QString errorOutput = process.readAllStandardError();
 
     if (process.exitCode() == 0) {
-        ui->commandPrompt->appendPlainText("Compilation successful!\n");
+        ui->commandPrompt->appendPlainText("Compilation successful!");
     } else {
-        ui->commandPrompt->appendPlainText("Compilation failed!\n");
+        ui->commandPrompt->appendPlainText("Compilation failed!");
     }
     ui->commandPrompt->moveCursor(QTextCursor::End);
 }

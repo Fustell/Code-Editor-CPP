@@ -1,15 +1,23 @@
 #ifndef CODEEDITOR_H
 #define CODEEDITOR_H
 
+#include <QtWidgets>
 #include <QWidget>
-#include <QPlainTextEdit>
+#include <QTextEdit>
 #include <QFont>
 #include <QCompleter>
-#include <QLineEdit>
-#include <QStringListModel>
 #include <QPainter>
+#include <QTextOption>
 
 #include "highlighter.h"
+
+struct FirstLineInfo
+{
+    int height;
+    int firstVisible;
+    int top;
+};
+
 
 namespace Ui {
 class CodeEditor;
@@ -17,7 +25,7 @@ class CodeEditor;
 
 class LineNumberArea;
 
-class CodeEditor : public QPlainTextEdit
+class CodeEditor : public QTextEdit
 {
     Q_OBJECT
 
@@ -48,6 +56,7 @@ private slots:
 
 private:
     QWidget *lineNumberArea;
+    FirstLineInfo getFirstLineInfo();
     QString currentFile;
 
 };
