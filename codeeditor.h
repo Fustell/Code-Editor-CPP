@@ -53,8 +53,6 @@ private slots:
     int getFirstVisibleBlockId();
 
     void updateLineNumberAreaWidth(int newBlockCount);
-    void updateLineNumberArea(QRectF /*rect_f*/);
-    void updateLineNumberArea(int /*slider_pos*/);
     void updateLineNumberArea();
 
     void insertCompletion(const QString &completion);

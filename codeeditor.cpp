@@ -25,11 +25,11 @@ CodeEditor::CodeEditor(QWidget *parent) : QTextEdit(parent)
     this->document()->setDefaultTextOption(textOption);
 
     lineNumberArea = new LineNumberArea(this);
-    connect(this->document(), SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
-    connect(this->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(updateLineNumberArea/*_2*/(int)));
+    connect(this->document(), SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth()));
+    connect(this->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(updateLineNumberArea()));
     connect(this, SIGNAL(textChanged()), this, SLOT(updateLineNumberArea()));
     connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(updateLineNumberArea()));
-//    connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
+    connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
 
     updateLineNumberAreaWidth(0);
 }
@@ -136,7 +136,7 @@ void CodeEditor::keyPressEvent(QKeyEvent *e)
     const bool hasModifier = (e->modifiers() != Qt::NoModifier) && !ctrlOrShift;
     QString completionPrefix = textUnderCursor();
 
-    if (!isShortcut && (hasModifier || e->text().isEmpty()|| completionPrefix.length() < 3
+    if (!isShortcut && (hasModifier || e->text().isEmpty()|| completionPrefix.length() < 1
                         || eow.contains(e->text().right(1)))) {
         c->popup()->hide();
         return;
@@ -182,14 +182,6 @@ void CodeEditor::updateLineNumberAreaWidth(int /* newBlockCount */)
 
 //![slotUpdateRequest]
 
-void CodeEditor::updateLineNumberArea(QRectF /*rect_f*/)
-{
-    CodeEditor::updateLineNumberArea();
-}
-void CodeEditor::updateLineNumberArea(int /*slider_pos*/)
-{
-    CodeEditor::updateLineNumberArea();
-}
 void CodeEditor::updateLineNumberArea()
 {
     /*
@@ -219,15 +211,6 @@ void CodeEditor::updateLineNumberArea()
     int first_block_id = getFirstVisibleBlockId();
     if (first_block_id == 0 || this->textCursor().block().blockNumber() == first_block_id-1)
         this->verticalScrollBar()->setSliderPosition(dy-this->document()->documentMargin());
-
-    //    // Snap to first line (TODO...)
-    //    if (first_block_id > 0)
-    //    {
-    //        int slider_pos = this->verticalScrollBar()->sliderPosition();
-    //        int prev_block_height = (int) this->document()->documentLayout()->blockBoundingRect(this->document()->findBlockByNumber(first_block_id-1)).height();
-    //        if (dy <= this->document()->documentMargin() + prev_block_height)
-    //            this->verticalScrollBar()->setSliderPosition(slider_pos - (this->document()->documentMargin() + prev_block_height));
-    //    }
 
 }
 
