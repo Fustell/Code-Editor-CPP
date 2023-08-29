@@ -11,6 +11,7 @@
 #include <QProcess>
 #include <QStyleFactory>
 #include <QFileSystemModel>
+#include <QCompleter>
 
 
 

@@ -1,0 +1,15 @@
+void
+int
+float
+double
+bool
+class
+new
+delete
+return
+public
+private
+protected
+cout
+cin
+std

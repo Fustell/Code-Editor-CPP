@@ -79,7 +79,6 @@ void MainWindow::on_actionOpen_file_triggered()
 
 }
 
-
 void MainWindow::on_actionNew_file_triggered()
 {
     ui->tabWidget->addTab(new CodeEditor(), tr("New tab"));

@@ -11,14 +11,6 @@
 
 #include "highlighter.h"
 
-struct FirstLineInfo
-{
-    int height;
-    int firstVisible;
-    int top;
-};
-
-
 namespace Ui {
 class CodeEditor;
 }
@@ -37,6 +29,10 @@ public:
 
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth();
+
+    void setCompleter(QCompleter *c);
+    QCompleter *completer() const;
+
     QString GetCurrentFile() const
     {
         return this->currentFile;
@@ -49,15 +45,30 @@ public:
 protected:
     void resizeEvent(QResizeEvent *event) override;
 
+    void keyPressEvent(QKeyEvent *e) override;
+    void focusInEvent(QFocusEvent *e) override;
+
 private slots:
-    void updateLineNumberAreaWidth(int newBlockCount);
     void highlightCurrentLine();
-    void updateLineNumberArea(const QRect &rect, int dy);
+    int getFirstVisibleBlockId();
+
+    void updateLineNumberAreaWidth(int newBlockCount);
+    void updateLineNumberArea(QRectF /*rect_f*/);
+    void updateLineNumberArea(int /*slider_pos*/);
+    void updateLineNumberArea();
+
+    void insertCompletion(const QString &completion);
 
 private:
     QWidget *lineNumberArea;
-    FirstLineInfo getFirstLineInfo();
     QString currentFile;
+    QCompleter *c = nullptr;
+
+    QAbstractItemModel *modelFromFile(const QString& fileName);
+
+    QString textUnderCursor() const;
+
+
 
 };
 

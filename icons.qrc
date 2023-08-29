@@ -7,5 +7,6 @@
         <file>icons/h.png</file>
         <file>icons/hpp.png</file>
         <file>icons/txt.png</file>
+        <file>resources/wordlist.txt</file>
     </qresource>
 </RCC>
