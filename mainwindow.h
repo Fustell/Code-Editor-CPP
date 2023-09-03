@@ -25,6 +25,8 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+    bool hasCompiler;
+
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
@@ -43,10 +45,12 @@ public:
     void on_actionSave_as_triggered();
 
     void on_actionBuild_triggered();
+    void on_actionRun_triggered();
 
 private:
     Ui::MainWindow *ui;
     QProcess compilerProcess;
+    QString exePath;
     QFileSystemModel *fileModel;
 };
 #endif // MAINWINDOW_H

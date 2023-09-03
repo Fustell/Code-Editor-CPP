@@ -3,6 +3,8 @@
 #include "codeeditor.h"
 #include "fileexplorer.h"
 
+#include <Windows.h>
+
 #define tabBar ui->tabWidget
 #define programName "IDE C++"
 
@@ -12,17 +14,28 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     setWindowTitle(programName);
+    hasCompiler = true;
+
+
+    QStringList envVars =  QProcessEnvironment::systemEnvironment().value("Path").split(";").filter("mingw");
+
+    if(envVars.size() == 0)
+    {
+        QMessageBox::critical(this, "Error","You don't have mingw compiler.\nPlease install and launch again.");
+        hasCompiler = false;
+        return;
+    }
 
     QAction *saveAction = new QAction(this);
     saveAction->setShortcut(Qt::Key_S | Qt::CTRL);
 
-    QAction *buildAction = new QAction(this);
-    buildAction->setShortcut(Qt::Key_F5);
+    QAction *RunAction = new QAction(this);
+    RunAction->setShortcut(Qt::Key_F5);
 
     connect(saveAction, SIGNAL(triggered()), this, SLOT(on_actionSave_file_triggered()));
-    connect(buildAction, SIGNAL(triggered()), this, SLOT(on_actionBuild_triggered()));
+    connect(RunAction, SIGNAL(triggered()), this, SLOT(on_actionRun_triggered()));
 
-    QList<QAction*> *actionsCollection = new QList<QAction*>{saveAction, buildAction};
+    QList<QAction*> *actionsCollection = new QList<QAction*>{saveAction, RunAction};
     this->addActions(*actionsCollection);
 
     compilerProcess.setProcessChannelMode(QProcess::MergedChannels);
@@ -105,12 +118,14 @@ void MainWindow::on_actionSave_file_triggered()
     if(filePath.isEmpty())
     {
         filePath = QFileDialog::getSaveFileName(this, "Save",QDir::homePath());
+
+        if(filePath.isEmpty()) return;
+
         QFile file(filePath);
         QFileInfo fileInfo(file.fileName());
-        QString filename(fileInfo.fileName());
 
         currentEditorTab->SetCurrentFile(filePath);
-        tabBar->setTabText(tabBar->currentIndex(), filename);
+        tabBar->setTabText(tabBar->currentIndex(), fileInfo.fileName());
     }
 
     QFile file(filePath);
@@ -161,9 +176,10 @@ void MainWindow::on_actionBuild_triggered()
 
     QFile file(currentTab->GetCurrentFile());
     QFileInfo fileInfo(file.fileName());
+    QString outputFilePath = fileInfo.absolutePath() + "/" + fileInfo.baseName();
 
     QStringList arguments;
-    QString outputFilePath = fileInfo.absolutePath() + "/" + fileInfo.baseName();
+    exePath = outputFilePath;
     arguments << "-o" << outputFilePath << currentTab->GetCurrentFile();
     arguments << "-v";
 
@@ -193,9 +209,6 @@ void MainWindow::on_actionBuild_triggered()
 
     process.waitForFinished();
 
-    QString output = process.readAllStandardOutput();
-    QString errorOutput = process.readAllStandardError();
-
     if (process.exitCode() == 0) {
         ui->commandPrompt->appendPlainText("Compilation successful!");
     } else {
@@ -204,3 +217,31 @@ void MainWindow::on_actionBuild_triggered()
     ui->commandPrompt->moveCursor(QTextCursor::End);
 }
 
+void MainWindow::on_actionRun_triggered()
+{
+    CodeEditor *currentTab = static_cast<CodeEditor*>(tabBar->currentWidget());
+
+    if(currentTab == nullptr) return;
+
+    QFile file(currentTab->GetCurrentFile());
+    QFileInfo fileInfo(file.fileName());
+    QFile outputFilePath = static_cast<QFile>(fileInfo.absolutePath() + "/" + fileInfo.baseName() + ".exe");
+
+    this->on_actionSave_file_triggered();
+    this->on_actionBuild_triggered();
+
+    if(outputFilePath.exists())
+    {
+        LPCWSTR wideFilePath = reinterpret_cast<LPCWSTR>(outputFilePath.fileName().utf16());
+
+        // Execute the file using ShellExecute
+        HINSTANCE result = ShellExecute(nullptr, L"open", wideFilePath, nullptr, nullptr, SW_SHOWNORMAL);
+
+        if (reinterpret_cast<int>(result) <= 32)
+        {
+            // Handle error if ShellExecute fails (result <= 32 indicates an error)
+            qDebug() << "Failed to execute the file";
+        }
+
+    }
+}

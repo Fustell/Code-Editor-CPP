@@ -331,3 +331,4 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
     }
 }
 //![extraAreaPaintEvent_2]
+

@@ -13,7 +13,7 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(PROJECT_SOURCES
-        main.cpp
+
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
@@ -26,7 +26,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         codeeditor.h codeeditor.cpp codeeditor.ui
         highlighter.h highlighter.cpp
         fileexplorer.h fileexplorer.cpp
-        icons.qrc
+        resources.qrc
+        main.cpp
 
 
 
