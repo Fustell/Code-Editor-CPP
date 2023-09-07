@@ -22,12 +22,20 @@ public:
     void SetUpDir(QString absolutPath);
     void openFile(QTreeWidgetItem *item, int column);
 
+    void SetSize(unsigned int width, unsigned int height)
+    {
+        this->resize(width, height);
+    }
+
 private slots:
     void updateFileTree();
     void openPreviousFileTree();
     void openNextFileTree();
 
 private:
+    unsigned int width;
+    unsigned int height;
+
     Ui::FileExplorer *ui;
     QTreeWidget *fileTreeWidget;
     QDir currentDirectory;

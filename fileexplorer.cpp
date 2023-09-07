@@ -30,6 +30,7 @@ void FileExplorer::updateFileTree() {
 }
 
 FileExplorer::FileExplorer(QWidget *parent) : QWidget(parent) {
+    this->SetSize(70, 16227);
     };
 
 void FileExplorer::openPreviousFileTree()

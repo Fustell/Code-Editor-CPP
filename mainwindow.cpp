@@ -5,7 +5,6 @@
 
 #include <Windows.h>
 
-#define tabBar ui->tabWidget
 #define programName "IDE C++"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -13,9 +12,12 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    QMainWindow::showMaximized();
+
     setWindowTitle(programName);
     hasCompiler = true;
 
+    ui->commandPrompt->resize(16220, 200);
 
     QStringList envVars =  QProcessEnvironment::systemEnvironment().value("Path").split(";").filter("mingw");
 
@@ -72,8 +74,8 @@ void MainWindow::on_actionOpen_file_triggered()
     CodeEditor* newTab = new CodeEditor();
     newTab->setPlainText(text);
 
-    tabBar->addTab(newTab, filename);
-    tabBar->setCurrentIndex(tabBar->count()-1);
+    ui->tabWidget->addTab(newTab, filename);
+    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
 
     newTab->SetCurrentFile(fileName);
     file.close();
@@ -109,7 +111,7 @@ void MainWindow::on_tabWidget_tabCloseRequested(int index)
 
 void MainWindow::on_actionSave_file_triggered()
 {
-    CodeEditor *currentEditorTab = static_cast<CodeEditor*>(tabBar->currentWidget());
+    CodeEditor *currentEditorTab = static_cast<CodeEditor*>(ui->tabWidget->currentWidget());
 
     if(currentEditorTab == nullptr) return;
 
@@ -125,7 +127,7 @@ void MainWindow::on_actionSave_file_triggered()
         QFileInfo fileInfo(file.fileName());
 
         currentEditorTab->SetCurrentFile(filePath);
-        tabBar->setTabText(tabBar->currentIndex(), fileInfo.fileName());
+        ui->tabWidget->setTabText(ui->tabWidget->currentIndex(), fileInfo.fileName());
     }
 
     QFile file(filePath);
@@ -147,7 +149,7 @@ void MainWindow::on_actionSave_file_triggered()
 void MainWindow::on_actionSave_as_triggered()
 {
 
-    CodeEditor *currentEditorTab = static_cast<CodeEditor*>(tabBar->currentWidget());
+    CodeEditor *currentEditorTab = static_cast<CodeEditor*>(ui->tabWidget->currentWidget());
 
 
     QString filePath = QFileDialog::getSaveFileName(this, "Save",QDir::homePath());
@@ -170,7 +172,7 @@ void MainWindow::on_actionSave_as_triggered()
 void MainWindow::on_actionBuild_triggered()
 {
     ui->commandPrompt->clear();
-    CodeEditor *currentTab = static_cast<CodeEditor*>(tabBar->currentWidget());
+    CodeEditor *currentTab = static_cast<CodeEditor*>(ui->tabWidget->currentWidget());
 
     if(currentTab == nullptr) return;
 
@@ -219,7 +221,7 @@ void MainWindow::on_actionBuild_triggered()
 
 void MainWindow::on_actionRun_triggered()
 {
-    CodeEditor *currentTab = static_cast<CodeEditor*>(tabBar->currentWidget());
+    CodeEditor *currentTab = static_cast<CodeEditor*>(ui->tabWidget->currentWidget());
 
     if(currentTab == nullptr) return;
 
