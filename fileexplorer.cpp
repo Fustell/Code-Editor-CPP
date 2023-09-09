@@ -15,11 +15,7 @@ void FileExplorer::updateFileTree() {
         if (fileInfo.isFile()) {
             QString fileExtention = fileInfo.suffix().toLower();
 
-            if(fileExtention == "txt") item->setIcon(0, QIcon(":/icons/txt.png"));
-            else if(fileExtention == "cpp") item->setIcon(0, QIcon(":/icons/cpp.png"));
-            else if(fileExtention == "c") item->setIcon(0, QIcon(":/icons/c.png"));
-            else if(fileExtention == "hpp") item->setIcon(0, QIcon(":/icons/hpp.png"));
-            else if(fileExtention == "h") item->setIcon(0, QIcon(":/icons/h.png"));
+            if(icons.contains(fileExtention)) item->setIcon(0, QIcon(icons.value(fileExtention)));
             else item->setIcon(0, QIcon(":/icons/empty.png"));
 
         }
@@ -30,6 +26,12 @@ void FileExplorer::updateFileTree() {
 }
 
 FileExplorer::FileExplorer(QWidget *parent) : QWidget(parent) {
+
+    icons["txt"] = ":/icons/txt.png";
+    icons["cpp"] = ":/icons/cpp.png";
+    icons["c"] = ":/icons/c.png";
+    icons["hpp"] = ":/icons/hpp.png";
+    icons["h"] = ":/icons/h.png";
     this->SetSize(70, 16227);
     };
 
@@ -106,7 +108,7 @@ void FileExplorer::openFile(QTreeWidgetItem *item, int column) {
                 if (editor->GetCurrentFile() == filePath) return;
             }
 
-            CodeEditor* newTab = new CodeEditor();
+            CodeEditor* newTab = new CodeEditor(filePath);
             newTab->setPlainText(fileContent);
             tabWidget->addTab(newTab, filename);
             tabWidget->setCurrentIndex(tabWidget->count()-1);

@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "codeeditor.h"
 #include "fileexplorer.h"
 
 #include <Windows.h>
@@ -12,7 +11,6 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    QMainWindow::showMaximized();
 
     setWindowTitle(programName);
     hasCompiler = true;
@@ -43,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent)
     compilerProcess.setProcessChannelMode(QProcess::MergedChannels);
 
     qApp->setStyle(QStyleFactory::create("Fusion"));
+    QMainWindow::showMaximized();
 }
 
 MainWindow::~MainWindow()
@@ -71,7 +70,7 @@ void MainWindow::on_actionOpen_file_triggered()
     QFileInfo fileInfo(file.fileName());
     QString filename(fileInfo.fileName());
 
-    CodeEditor* newTab = new CodeEditor();
+    CodeEditor* newTab = new CodeEditor(fileName);
     newTab->setPlainText(text);
 
     ui->tabWidget->addTab(newTab, filename);
@@ -169,16 +168,10 @@ void MainWindow::on_actionSave_as_triggered()
     file.close();
 }
 
-void MainWindow::on_actionBuild_triggered()
+void MainWindow::CompileCpp(CodeEditor *currentTab, QFileInfo fileInfo)
 {
-    ui->commandPrompt->clear();
-    CodeEditor *currentTab = static_cast<CodeEditor*>(ui->tabWidget->currentWidget());
-
-    if(currentTab == nullptr) return;
-
-    QFile file(currentTab->GetCurrentFile());
-    QFileInfo fileInfo(file.fileName());
     QString outputFilePath = fileInfo.absolutePath() + "/" + fileInfo.baseName();
+    QString fileExtention = fileInfo.suffix().toLower();
 
     QStringList arguments;
     exePath = outputFilePath;
@@ -202,7 +195,9 @@ void MainWindow::on_actionBuild_triggered()
         ui->commandPrompt->moveCursor(QTextCursor::End);
     });
 
-    process.start("g++", arguments);
+    QString command = fileExtention == "cpp" ? "g++":"gcc";
+
+    process.start(command, arguments);
     process.waitForStarted();
 
     while (process.state() == QProcess::Running) {
@@ -217,6 +212,22 @@ void MainWindow::on_actionBuild_triggered()
         ui->commandPrompt->appendPlainText("Compilation failed!");
     }
     ui->commandPrompt->moveCursor(QTextCursor::End);
+}
+
+void MainWindow::on_actionBuild_triggered()
+{
+    CodeEditor *currentTab = static_cast<CodeEditor*>(ui->tabWidget->currentWidget());
+
+    if(currentTab == nullptr) return;
+
+    QFile file(currentTab->GetCurrentFile());
+    QFileInfo fileInfo(file.fileName());
+    QString fileExtention = fileInfo.suffix().toLower();
+    if(fileExtention == "cpp" || fileExtention == "c")
+    {
+        ui->commandPrompt->clear();
+        this->CompileCpp(currentTab, fileInfo);
+    }
 }
 
 void MainWindow::on_actionRun_triggered()

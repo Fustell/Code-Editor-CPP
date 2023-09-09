@@ -39,6 +39,9 @@ private:
     QTextCharFormat thisAndArrowFormat;
     QTextCharFormat newDeleteOperatorFormat;
     QTextCharFormat classNameFormat;
+    QTextCharFormat variableFormat;
+    QTextCharFormat pointerFormat;
+    QTextCharFormat referenceFormat;
 };
 
 

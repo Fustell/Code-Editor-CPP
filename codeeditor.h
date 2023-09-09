@@ -24,13 +24,13 @@ class CodeEditor : public QTextEdit
 public:
     Highlighter *highlighter;
 
-    explicit CodeEditor(QWidget *parent = nullptr);
+    explicit CodeEditor(QString filePath="",QWidget *parent = nullptr);
     ~CodeEditor();
 
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth();
-
     void setCompleter(QCompleter *c);
+
     QCompleter *completer() const;
 
     QString GetCurrentFile() const
@@ -41,6 +41,26 @@ public:
     {
         this->currentFile = file;
     }
+
+    int GetTabStopWidth() const
+    {
+        return this->tabStopWidth;
+    }
+    void SetTabStopWidth(int val)
+    {
+        this->tabStopWidth = val;
+        this->textOption.setTabStopDistance(val);
+    }
+
+    QColor GetLineColor() const
+    {
+        return this->tabStopWidth;
+    }
+    void SetLineColor(QColor val)
+    {
+        this->lineColor = val;
+    }
+
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -58,9 +78,12 @@ private slots:
     void insertCompletion(const QString &completion);
 
 private:
+    int tabStopWidth = 25;
     QWidget *lineNumberArea;
     QString currentFile;
     QCompleter *c = nullptr;
+    QTextOption textOption;
+    QColor lineColor = QColor(50, 50, 50, 255).lighter(160);
 
     QAbstractItemModel *modelFromFile(const QString& fileName);
 
@@ -78,8 +101,6 @@ public:
         QFont serifFont("Times", 10, QFont::Bold);
 
         codeEditor->setFont(serifFont);
-
-        codeEditor->highlighter = new Highlighter(codeEditor->document());
     }
 
     QSize sizeHint() const override

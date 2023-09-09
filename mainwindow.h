@@ -13,7 +13,7 @@
 #include <QFileSystemModel>
 #include <QCompleter>
 
-
+#include "codeeditor.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -29,7 +29,7 @@ public:
 
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
+    void CompileCpp(CodeEditor *currentTab, QFileInfo fileInfo);
     private slots:
 
     void on_actionExit_triggered();

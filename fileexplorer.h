@@ -8,6 +8,7 @@
 #include <QPushButton>
 #include <QStack>
 #include <QLabel>
+#include <QMap>
 
 namespace Ui {
 class FileExplorer;
@@ -18,6 +19,8 @@ class FileExplorer : public QWidget
     Q_OBJECT
 
 public:
+    QMap<QString, QString> icons;
+
     explicit FileExplorer(QWidget *parent = nullptr);
     void SetUpDir(QString absolutPath);
     void openFile(QTreeWidgetItem *item, int column);

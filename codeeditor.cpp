@@ -3,26 +3,30 @@
 
 CodeEditor::~CodeEditor()
 {
+    delete c;
     delete lineNumberArea;
 }
 
 //![constructor]
-CodeEditor::CodeEditor(QWidget *parent) : QTextEdit(parent)
+CodeEditor::CodeEditor(QString filePath, QWidget *parent) : QTextEdit(parent), currentFile(filePath)
 {
+    this->textOption.setTabStopDistance(tabStopWidth);
+    this->document()->setDefaultTextOption(textOption);
 
     c = new QCompleter(this);
-    c->setModel(modelFromFile(":/resources/wordlist.txt"));
-    c->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
-    c->setCaseSensitivity(Qt::CaseInsensitive);
-    c->setWrapAround(false);
-    this->setCompleter(c);
+    QFile file(currentFile);
+    QFileInfo fileInfo(file.fileName());
+    QString fileExtention = fileInfo.suffix().toLower();
 
-    QTextOption textOption;
-    int tabStopWidth = 25;
-    textOption.setTabStopDistance(tabStopWidth);
-
-    // Apply the QTextOption to the QTextEdit widget
-    this->document()->setDefaultTextOption(textOption);
+    if(fileExtention == "c" || fileExtention=="cpp" || fileExtention=="hpp" || fileExtention=="h")
+    {
+        c->setModel(modelFromFile(":/resources/wordlist.txt"));
+        c->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
+        c->setCaseSensitivity(Qt::CaseInsensitive);
+        c->setWrapAround(false);
+        this->setCompleter(c);
+        this->highlighter = new Highlighter(this->document());
+    }
 
     lineNumberArea = new LineNumberArea(this);
     connect(this->document(), SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth()));
@@ -236,8 +240,6 @@ void CodeEditor::highlightCurrentLine()
 
     if (!isReadOnly()) {
         QTextEdit::ExtraSelection selection;
-
-        QColor lineColor = QColor(50, 50, 50, 255).lighter(160);
 
         selection.format.setBackground(lineColor);
         selection.format.setProperty(QTextFormat::FullWidthSelection, true);
