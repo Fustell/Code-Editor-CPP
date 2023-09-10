@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowTitle(programName);
     hasCompiler = true;
 
-    ui->commandPrompt->resize(16220, 200);
+    ui->OutputTabWidget->resize(16220, 200);
 
     QStringList envVars =  QProcessEnvironment::systemEnvironment().value("Path").split(";").filter("mingw");
 
@@ -168,7 +168,7 @@ void MainWindow::on_actionSave_as_triggered()
     file.close();
 }
 
-void MainWindow::CompileCpp(CodeEditor *currentTab, QFileInfo fileInfo)
+void MainWindow::CompileCpp(QPlainTextEdit* outputPrompt,CodeEditor *currentTab, QFileInfo fileInfo)
 {
     QString outputFilePath = fileInfo.absolutePath() + "/" + fileInfo.baseName();
     QString fileExtention = fileInfo.suffix().toLower();
@@ -181,18 +181,18 @@ void MainWindow::CompileCpp(CodeEditor *currentTab, QFileInfo fileInfo)
     QProcess process;
     process.setProcessChannelMode(QProcess::MergedChannels);
 
-    connect(&process, &QProcess::readyReadStandardOutput, [this, &process]() {
+    connect(&process, &QProcess::readyReadStandardOutput, [this, &process, outputPrompt]() {
         QString output = process.readAllStandardOutput();
-        ui->commandPrompt->moveCursor(QTextCursor::End);
-        ui->commandPrompt->insertPlainText(output);
-        ui->commandPrompt->moveCursor(QTextCursor::End);
+        outputPrompt->moveCursor(QTextCursor::End);
+        outputPrompt->insertPlainText(output);
+        outputPrompt->moveCursor(QTextCursor::End);
     });
 
-    connect(&process, &QProcess::readyReadStandardError, [this, &process]() {
+    connect(&process, &QProcess::readyReadStandardError, [this, &process, outputPrompt]() {
         QString errorOutput = process.readAllStandardError();
-        ui->commandPrompt->moveCursor(QTextCursor::End);
-        ui->commandPrompt->insertPlainText(errorOutput);
-        ui->commandPrompt->moveCursor(QTextCursor::End);
+        outputPrompt->moveCursor(QTextCursor::End);
+        outputPrompt->insertPlainText(errorOutput);
+        outputPrompt->moveCursor(QTextCursor::End);
     });
 
     QString command = fileExtention == "cpp" ? "g++":"gcc";
@@ -207,26 +207,77 @@ void MainWindow::CompileCpp(CodeEditor *currentTab, QFileInfo fileInfo)
     process.waitForFinished();
 
     if (process.exitCode() == 0) {
-        ui->commandPrompt->appendPlainText("Compilation successful!");
+        outputPrompt->appendPlainText("Compilation successful!");
     } else {
-        ui->commandPrompt->appendPlainText("Compilation failed!");
+        outputPrompt->appendPlainText("Compilation failed!");
     }
-    ui->commandPrompt->moveCursor(QTextCursor::End);
+    outputPrompt->moveCursor(QTextCursor::End);
+}
+
+void MainWindow::CompileAsm(QPlainTextEdit* outputPrompt,CodeEditor *currentTab, QFileInfo fileInfo)
+{
+    QString outputFilePath = fileInfo.absolutePath() + "/" + fileInfo.baseName();
+
+    QStringList arguments;
+    exePath = outputFilePath;
+    arguments  << "/Fo"+outputFilePath+".obj" << "/OUT:"+outputFilePath+".exe"<< currentTab->GetCurrentFile();
+    arguments << "/link" << "/entry:main";
+
+    QProcess process;
+    process.setProcessChannelMode(QProcess::MergedChannels);
+
+    connect(&process, &QProcess::readyReadStandardOutput, [this, &process,outputPrompt]() {
+        QString output = process.readAllStandardOutput();
+        outputPrompt->moveCursor(QTextCursor::End);
+        outputPrompt->insertPlainText(output);
+        outputPrompt->moveCursor(QTextCursor::End);
+    });
+
+    connect(&process, &QProcess::readyReadStandardError, [this, &process,outputPrompt]() {
+        QString errorOutput = process.readAllStandardError();
+        outputPrompt->moveCursor(QTextCursor::End);
+        outputPrompt->insertPlainText(errorOutput);
+        outputPrompt->moveCursor(QTextCursor::End);
+    });
+
+    QString command = "G:\\MicrosoftVisualStudio\\Community\\VC\\Tools\\MSVC\\14.37.32822\\bin\\Hostx64\\x64\\ml64.exe";
+
+    process.start(command, arguments);
+    process.waitForStarted();
+
+    while (process.state() == QProcess::Running) {
+        QCoreApplication::processEvents(); // Process pending events to update the UI
+    }
+
+    process.waitForFinished();
+
+    if (process.exitCode() == 0) {
+        outputPrompt->appendPlainText("Compilation successful!");
+    } else {
+        outputPrompt->appendPlainText("Compilation failed!");
+    }
+    outputPrompt->moveCursor(QTextCursor::End);
 }
 
 void MainWindow::on_actionBuild_triggered()
 {
     CodeEditor *currentTab = static_cast<CodeEditor*>(ui->tabWidget->currentWidget());
+    QPlainTextEdit* outputPrompt = ui->OutputTabWidget->findChild<QWidget*>("build")->findChild<QPlainTextEdit*>();
 
-    if(currentTab == nullptr) return;
+    if(currentTab == nullptr || outputPrompt == nullptr) return;
 
     QFile file(currentTab->GetCurrentFile());
     QFileInfo fileInfo(file.fileName());
     QString fileExtention = fileInfo.suffix().toLower();
+    outputPrompt->clear();
     if(fileExtention == "cpp" || fileExtention == "c")
     {
-        ui->commandPrompt->clear();
-        this->CompileCpp(currentTab, fileInfo);
+        this->CompileCpp(outputPrompt,currentTab, fileInfo);
+    }
+
+    if(fileExtention == "asm")
+    {
+        this->CompileAsm(outputPrompt, currentTab, fileInfo);
     }
 }
 

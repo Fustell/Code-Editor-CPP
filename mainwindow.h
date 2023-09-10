@@ -29,7 +29,8 @@ public:
 
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    void CompileCpp(CodeEditor *currentTab, QFileInfo fileInfo);
+    void CompileCpp(QPlainTextEdit* outputPrompt,CodeEditor *currentTab, QFileInfo fileInfo);
+    void CompileAsm(QPlainTextEdit* outputPrompt,CodeEditor *currentTab, QFileInfo fileInfo);
     private slots:
 
     void on_actionExit_triggered();
