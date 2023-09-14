@@ -29,9 +29,9 @@ public:
 
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    void CompileCpp(QPlainTextEdit* outputPrompt,CodeEditor *currentTab, QFileInfo fileInfo);
-    void CompileAsm(QPlainTextEdit* outputPrompt,CodeEditor *currentTab, QFileInfo fileInfo);
-    private slots:
+    void CompileCpp(CodeEditor *currentTab, QFileInfo fileInfo);
+    void CompileAsm(CodeEditor *currentTab, QFileInfo fileInfo);
+private slots:
 
     void on_actionExit_triggered();
 
@@ -47,11 +47,13 @@ public:
 
     void on_actionBuild_triggered();
     void on_actionRun_triggered();
+    void on_actionDebug_triggered();
 
 private:
     Ui::MainWindow *ui;
     QProcess compilerProcess;
     QString exePath;
     QFileSystemModel *fileModel;
+    QPlainTextEdit* outputPrompt;
 };
 #endif // MAINWINDOW_H

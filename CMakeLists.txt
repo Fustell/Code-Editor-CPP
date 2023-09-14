@@ -23,7 +23,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(IDE
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        codeeditor.h codeeditor.cpp codeeditor.ui
+        codeeditor.h codeeditor.cpp
         highlighter.h highlighter.cpp
         fileexplorer.h fileexplorer.cpp
         resources.qrc

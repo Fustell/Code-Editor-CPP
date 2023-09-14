@@ -42,6 +42,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     qApp->setStyle(QStyleFactory::create("Fusion"));
     QMainWindow::showMaximized();
+
+    outputPrompt = ui->OutputTabWidget->findChild<QWidget*>("build")->findChild<QPlainTextEdit*>();
 }
 
 MainWindow::~MainWindow()
@@ -168,7 +170,7 @@ void MainWindow::on_actionSave_as_triggered()
     file.close();
 }
 
-void MainWindow::CompileCpp(QPlainTextEdit* outputPrompt,CodeEditor *currentTab, QFileInfo fileInfo)
+void MainWindow::CompileCpp(CodeEditor *currentTab, QFileInfo fileInfo)
 {
     QString outputFilePath = fileInfo.absolutePath() + "/" + fileInfo.baseName();
     QString fileExtention = fileInfo.suffix().toLower();
@@ -181,14 +183,14 @@ void MainWindow::CompileCpp(QPlainTextEdit* outputPrompt,CodeEditor *currentTab,
     QProcess process;
     process.setProcessChannelMode(QProcess::MergedChannels);
 
-    connect(&process, &QProcess::readyReadStandardOutput, [this, &process, outputPrompt]() {
+    connect(&process, &QProcess::readyReadStandardOutput, [this, &process]() {
         QString output = process.readAllStandardOutput();
         outputPrompt->moveCursor(QTextCursor::End);
         outputPrompt->insertPlainText(output);
         outputPrompt->moveCursor(QTextCursor::End);
     });
 
-    connect(&process, &QProcess::readyReadStandardError, [this, &process, outputPrompt]() {
+    connect(&process, &QProcess::readyReadStandardError, [this, &process]() {
         QString errorOutput = process.readAllStandardError();
         outputPrompt->moveCursor(QTextCursor::End);
         outputPrompt->insertPlainText(errorOutput);
@@ -214,7 +216,7 @@ void MainWindow::CompileCpp(QPlainTextEdit* outputPrompt,CodeEditor *currentTab,
     outputPrompt->moveCursor(QTextCursor::End);
 }
 
-void MainWindow::CompileAsm(QPlainTextEdit* outputPrompt,CodeEditor *currentTab, QFileInfo fileInfo)
+void MainWindow::CompileAsm(CodeEditor *currentTab, QFileInfo fileInfo)
 {
     QString outputFilePath = fileInfo.absolutePath() + "/" + fileInfo.baseName();
 
@@ -226,14 +228,14 @@ void MainWindow::CompileAsm(QPlainTextEdit* outputPrompt,CodeEditor *currentTab,
     QProcess process;
     process.setProcessChannelMode(QProcess::MergedChannels);
 
-    connect(&process, &QProcess::readyReadStandardOutput, [this, &process,outputPrompt]() {
+    connect(&process, &QProcess::readyReadStandardOutput, [this, &process]() {
         QString output = process.readAllStandardOutput();
         outputPrompt->moveCursor(QTextCursor::End);
         outputPrompt->insertPlainText(output);
         outputPrompt->moveCursor(QTextCursor::End);
     });
 
-    connect(&process, &QProcess::readyReadStandardError, [this, &process,outputPrompt]() {
+    connect(&process, &QProcess::readyReadStandardError, [this, &process]() {
         QString errorOutput = process.readAllStandardError();
         outputPrompt->moveCursor(QTextCursor::End);
         outputPrompt->insertPlainText(errorOutput);
@@ -259,10 +261,14 @@ void MainWindow::CompileAsm(QPlainTextEdit* outputPrompt,CodeEditor *currentTab,
     outputPrompt->moveCursor(QTextCursor::End);
 }
 
+void MainWindow::on_actionDebug_triggered()
+{
+
+}
+
 void MainWindow::on_actionBuild_triggered()
 {
     CodeEditor *currentTab = static_cast<CodeEditor*>(ui->tabWidget->currentWidget());
-    QPlainTextEdit* outputPrompt = ui->OutputTabWidget->findChild<QWidget*>("build")->findChild<QPlainTextEdit*>();
 
     if(currentTab == nullptr || outputPrompt == nullptr) return;
 
@@ -272,12 +278,12 @@ void MainWindow::on_actionBuild_triggered()
     outputPrompt->clear();
     if(fileExtention == "cpp" || fileExtention == "c")
     {
-        this->CompileCpp(outputPrompt,currentTab, fileInfo);
+        this->CompileCpp(currentTab, fileInfo);
     }
 
     if(fileExtention == "asm")
     {
-        this->CompileAsm(outputPrompt, currentTab, fileInfo);
+        this->CompileAsm(currentTab, fileInfo);
     }
 }
 

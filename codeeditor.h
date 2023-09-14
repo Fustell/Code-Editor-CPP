@@ -8,6 +8,7 @@
 #include <QCompleter>
 #include <QPainter>
 #include <QTextOption>
+#include <QMouseEvent>
 
 #include "highlighter.h"
 
@@ -61,6 +62,7 @@ public:
         this->lineColor = val;
     }
 
+    int getFirstVisibleBlockId();
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -70,7 +72,6 @@ protected:
 
 private slots:
     void highlightCurrentLine();
-    int getFirstVisibleBlockId();
 
     void updateLineNumberAreaWidth(int newBlockCount);
     void updateLineNumberArea();
@@ -99,8 +100,11 @@ public:
     LineNumberArea(CodeEditor *editor) : QWidget(editor), codeEditor(editor)
     {
         QFont serifFont("Times", 10, QFont::Bold);
-
+        setMouseTracking(true);
         codeEditor->setFont(serifFont);
+
+        breakpoints.clear();
+
     }
 
     QSize sizeHint() const override
@@ -108,14 +112,85 @@ public:
         return QSize(codeEditor->lineNumberAreaWidth(), 0);
     }
 
+    void addBreakpoint(int lineNumber)
+    {
+        breakpoints.insert(lineNumber);
+        update(); // Redraw the widget to show the new breakpoint.
+    }
+
+    // Remove a breakpoint line.
+    void removeBreakpoint(int lineNumber)
+    {
+        breakpoints.remove(lineNumber);
+        update(); // Redraw the widget to remove the breakpoint.
+    }
+
 protected:
     CodeEditor *codeEditor;
+    QSet<int> breakpoints;
 
     void paintEvent(QPaintEvent *event) override
     {
         codeEditor->lineNumberAreaPaintEvent(event);
-    }
 
+        int blockNumber = codeEditor->getFirstVisibleBlockId();
+        QTextBlock block = codeEditor->document()->findBlockByNumber(blockNumber);
+        QTextBlock prev_block = (blockNumber > 0) ? codeEditor->document()->findBlockByNumber(blockNumber-1) : block;
+        int translate_y = (blockNumber > 0) ? -codeEditor->verticalScrollBar()->sliderPosition() : 0;
+
+        int top = codeEditor->viewport()->geometry().top();
+
+        // Adjust text position according to the previous "non entirely visible" block
+        // if applicable. Also takes in consideration the document's margin offset.
+        int additional_margin;
+        if (blockNumber == 0)
+        {
+            // Simply adjust to document's margin
+            additional_margin = (int) codeEditor->document()->documentMargin() -1 - codeEditor->verticalScrollBar()->sliderPosition();
+        }
+        else
+        {
+            // Getting the height of the visible part of the previous "non entirely visible" block
+            additional_margin = (int) codeEditor->document()->documentLayout()->blockBoundingRect(prev_block)
+                                    .translated(0, translate_y).intersected(codeEditor->viewport()->geometry()).height();
+        }
+
+        // Shift the starting point
+        top += additional_margin;
+
+        int bottom = top + (int) codeEditor->document()->documentLayout()->blockBoundingRect(block).height();
+
+        QPainter painter(this);
+
+        while (block.isValid() && top <= event->rect().bottom()) {
+            if (block.isVisible() && bottom >= event->rect().top() && breakpoints.contains(blockNumber)) {
+                painter.setPen(Qt::black);
+                painter.setBrush(Qt::red);
+                painter.drawEllipse(0, top+3, 9, 9);
+            }
+            block = block.next();
+            top = bottom;
+            bottom = top + (int) codeEditor->document()->documentLayout()->blockBoundingRect(block).height();;
+            ++blockNumber;
+
+        }
+
+    }
+    void mousePressEvent(QMouseEvent *event) override {
+        if (event->button() == Qt::LeftButton) {
+            int lineNumber = codeEditor->cursorForPosition(event->pos()).blockNumber();
+
+            if (breakpoints.contains(lineNumber)) {
+
+                removeBreakpoint(lineNumber);
+                qDebug() << "Breakpoint removed from line" << lineNumber + 1;
+            } else {
+
+                addBreakpoint(lineNumber);
+                qDebug() << "Breakpoint set on line" << lineNumber + 1;
+            }
+        }
+    }
 };
 
 

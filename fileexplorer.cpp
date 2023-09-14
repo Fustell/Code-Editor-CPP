@@ -1,6 +1,5 @@
 #include "fileexplorer.h"
 #include "codeeditor.h"
-#include "ui_codeeditor.h"
 
 void FileExplorer::updateFileTree() {
     fileTreeWidget->clear();
@@ -98,7 +97,7 @@ void FileExplorer::openFile(QTreeWidgetItem *item, int column) {
         if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             QString fileContent = QString::fromUtf8(file.readAll());
             file.close();
-            QTabWidget *tabWidget = parentWidget()->parentWidget()->findChild<QTabWidget*>();
+            QTabWidget *tabWidget = parentWidget()->parentWidget()->findChild<QTabWidget*>("tabWidget");
 
             if (tabWidget == nullptr) return;
 
