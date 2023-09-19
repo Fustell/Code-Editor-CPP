@@ -1,6 +1,5 @@
 #include "codeeditor.h"
 
-
 CodeEditor::~CodeEditor()
 {
     delete c;

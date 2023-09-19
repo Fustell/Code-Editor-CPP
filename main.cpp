@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     MainWindow w;
 
-    if(!w.hasCompiler) return -1;
+    if(!w.hasCppCompiler()) return -1;
 
     w.show();
     return a.exec();

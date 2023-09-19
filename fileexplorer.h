@@ -9,6 +9,8 @@
 #include <QStack>
 #include <QLabel>
 #include <QMap>
+#include <QContextMenuEvent>
+#include <QFileSystemWatcher>
 
 namespace Ui {
 class FileExplorer;
@@ -34,6 +36,7 @@ private slots:
     void updateFileTree();
     void openPreviousFileTree();
     void openNextFileTree();
+    void showContextMenu(const QPoint& pos);
 
 private:
     unsigned int width;
@@ -46,6 +49,7 @@ private:
     QPushButton *forwardspace;
     QStack<QDir> historyNav;
     QLabel *path;
+    QFileSystemWatcher *fileSystemWatcher;
 };
 
 #endif // FILEEXPLORER_H

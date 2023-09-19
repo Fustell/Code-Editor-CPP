@@ -1,10 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "fileexplorer.h"
-
 #include <Windows.h>
 
-#define programName "IDE C++"
+#define programName "Code Editor C/C++"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -13,7 +12,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     setWindowTitle(programName);
-    hasCompiler = true;
 
     ui->OutputTabWidget->resize(16220, 200);
 
@@ -22,14 +20,18 @@ MainWindow::MainWindow(QWidget *parent)
     if(envVars.size() == 0)
     {
         QMessageBox::critical(this, "Error","You don't have mingw compiler.\nPlease install and launch again.");
-        hasCompiler = false;
+        this->setCppCompiler(false);
         return;
+    }
+    else
+    {
+        this->setCppCompiler(true);
     }
 
     QAction *saveAction = new QAction(this);
-    saveAction->setShortcut(Qt::Key_S | Qt::CTRL);
-
     QAction *RunAction = new QAction(this);
+
+    saveAction->setShortcut(Qt::Key_S | Qt::CTRL);
     RunAction->setShortcut(Qt::Key_F5);
 
     connect(saveAction, SIGNAL(triggered()), this, SLOT(on_actionSave_file_triggered()));
@@ -152,7 +154,6 @@ void MainWindow::on_actionSave_as_triggered()
 
     CodeEditor *currentEditorTab = static_cast<CodeEditor*>(ui->tabWidget->currentWidget());
 
-
     QString filePath = QFileDialog::getSaveFileName(this, "Save",QDir::homePath());
     QFile file(filePath);
 
@@ -163,6 +164,7 @@ void MainWindow::on_actionSave_as_triggered()
     }
 
     currentEditorTab->SetCurrentFile(filePath);
+
     QTextStream out(&file);
     QString text = currentEditorTab->toPlainText();
 
@@ -177,93 +179,40 @@ void MainWindow::CompileCpp(CodeEditor *currentTab, QFileInfo fileInfo)
 
     QStringList arguments;
     exePath = outputFilePath;
-    arguments << "-o" << outputFilePath << currentTab->GetCurrentFile();
+    arguments <<"-g" << "-o" << outputFilePath << currentTab->GetCurrentFile();
     arguments << "-v";
 
-    QProcess process;
-    process.setProcessChannelMode(QProcess::MergedChannels);
+    compilerProcess.setProcessChannelMode(QProcess::MergedChannels);
 
-    connect(&process, &QProcess::readyReadStandardOutput, [this, &process]() {
-        QString output = process.readAllStandardOutput();
+    connect(&compilerProcess, &QProcess::readyReadStandardOutput, [this]() {
+        QString output = compilerProcess.readAllStandardOutput();
         outputPrompt->moveCursor(QTextCursor::End);
         outputPrompt->insertPlainText(output);
         outputPrompt->moveCursor(QTextCursor::End);
     });
 
-    connect(&process, &QProcess::readyReadStandardError, [this, &process]() {
-        QString errorOutput = process.readAllStandardError();
+    connect(&compilerProcess, &QProcess::readyReadStandardError, [this]() {
+        QString errorOutput = compilerProcess.readAllStandardError();
         outputPrompt->moveCursor(QTextCursor::End);
         outputPrompt->insertPlainText(errorOutput);
         outputPrompt->moveCursor(QTextCursor::End);
     });
 
-    QString command = fileExtention == "cpp" ? "g++":"gcc";
+    compilerProcess.start("g++", arguments);
+    compilerProcess.waitForStarted();
 
-    process.start(command, arguments);
-    process.waitForStarted();
-
-    while (process.state() == QProcess::Running) {
+    while (compilerProcess.state() == QProcess::Running) {
         QCoreApplication::processEvents(); // Process pending events to update the UI
     }
 
-    process.waitForFinished();
+    compilerProcess.waitForFinished();
 
-    if (process.exitCode() == 0) {
+    if (compilerProcess.exitCode() == 0) {
         outputPrompt->appendPlainText("Compilation successful!");
     } else {
         outputPrompt->appendPlainText("Compilation failed!");
     }
     outputPrompt->moveCursor(QTextCursor::End);
-}
-
-void MainWindow::CompileAsm(CodeEditor *currentTab, QFileInfo fileInfo)
-{
-    QString outputFilePath = fileInfo.absolutePath() + "/" + fileInfo.baseName();
-
-    QStringList arguments;
-    exePath = outputFilePath;
-    arguments  << "/Fo"+outputFilePath+".obj" << "/OUT:"+outputFilePath+".exe"<< currentTab->GetCurrentFile();
-    arguments << "/link" << "/entry:main";
-
-    QProcess process;
-    process.setProcessChannelMode(QProcess::MergedChannels);
-
-    connect(&process, &QProcess::readyReadStandardOutput, [this, &process]() {
-        QString output = process.readAllStandardOutput();
-        outputPrompt->moveCursor(QTextCursor::End);
-        outputPrompt->insertPlainText(output);
-        outputPrompt->moveCursor(QTextCursor::End);
-    });
-
-    connect(&process, &QProcess::readyReadStandardError, [this, &process]() {
-        QString errorOutput = process.readAllStandardError();
-        outputPrompt->moveCursor(QTextCursor::End);
-        outputPrompt->insertPlainText(errorOutput);
-        outputPrompt->moveCursor(QTextCursor::End);
-    });
-
-    QString command = "G:\\MicrosoftVisualStudio\\Community\\VC\\Tools\\MSVC\\14.37.32822\\bin\\Hostx64\\x64\\ml64.exe";
-
-    process.start(command, arguments);
-    process.waitForStarted();
-
-    while (process.state() == QProcess::Running) {
-        QCoreApplication::processEvents(); // Process pending events to update the UI
-    }
-
-    process.waitForFinished();
-
-    if (process.exitCode() == 0) {
-        outputPrompt->appendPlainText("Compilation successful!");
-    } else {
-        outputPrompt->appendPlainText("Compilation failed!");
-    }
-    outputPrompt->moveCursor(QTextCursor::End);
-}
-
-void MainWindow::on_actionDebug_triggered()
-{
-
 }
 
 void MainWindow::on_actionBuild_triggered()
@@ -275,15 +224,13 @@ void MainWindow::on_actionBuild_triggered()
     QFile file(currentTab->GetCurrentFile());
     QFileInfo fileInfo(file.fileName());
     QString fileExtention = fileInfo.suffix().toLower();
+
     outputPrompt->clear();
-    if(fileExtention == "cpp" || fileExtention == "c")
+
+    QSet<QString> allowedExtentions = {"cpp", "c", "cxx"};
+    if(allowedExtentions.contains(fileExtention))
     {
         this->CompileCpp(currentTab, fileInfo);
-    }
-
-    if(fileExtention == "asm")
-    {
-        this->CompileAsm(currentTab, fileInfo);
     }
 }
 

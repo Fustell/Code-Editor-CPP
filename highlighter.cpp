@@ -27,12 +27,6 @@ Highlighter::Highlighter(QTextDocument *parent)
         highlightingRules.append(rule);
     }
 
-//    classFormat.setFontWeight(QFont::Bold);
-//    classFormat.setForeground(Qt::darkMagenta);
-//    rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Z][A-Za-z0-9_]*(?=\\s*\\(|=)"));
-//    rule.format = classFormat;
-//    highlightingRules.append(rule);
-
     quotationFormat.setForeground(QColor(255, 174, 0));
     rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
     rule.format = quotationFormat;
@@ -69,14 +63,6 @@ Highlighter::Highlighter(QTextDocument *parent)
     rule.format = returnFormat;
     highlightingRules.append(rule);
 
-
-
-//    // Rule for highlighting '->'
-//    arrowOperatorFormat.setForeground(Qt::green); // Set your desired text color for the '->' operator
-//    rule.pattern = QRegularExpression("\\b[A-Z][A-Za-z0-9_]*(?=\\s*\\(|=)->\\K\\w+");
-//    rule.format = arrowOperatorFormat;
-//    highlightingRules.append(rule);
-
     thisAndArrowFormat.setForeground(QColor(0,145,255)); // Set your desired text color for 'this' and the subsequent word
     rule.pattern = QRegularExpression("\\bthis");
     rule.format = thisAndArrowFormat;
@@ -96,21 +82,6 @@ Highlighter::Highlighter(QTextDocument *parent)
     rule.pattern = QRegularExpression("\\b[A-Z][A-Za-z0-9_]*(?=\\s*\\*)");
     rule.format = classNameFormat;
     highlightingRules.append(rule);
-
-//    variableFormat.setForeground(QColor(81, 163, 240));
-//    rule.pattern = QRegularExpression("\\b[a-zA-Z_][a-zA-Z0-9_]\\s+[a-zA-Z_][a-zA-Z0-9_];\\b");
-//    rule.format = variableFormat;
-//    highlightingRules.append(rule);
-
-//    pointerFormat.setForeground(QColor(81, 163, 240));
-//    rule.pattern = QRegularExpression("\\b\\w+\\s*\\*\\b");
-//    rule.format = pointerFormat;
-//    highlightingRules.append(rule);
-
-//    referenceFormat.setForeground(QColor(81, 163, 240));
-//    rule.pattern = QRegularExpression("\\b\\w+\\s*&\\b");
-//    rule.format = referenceFormat;
-//    highlightingRules.append(rule);
 
     multiLineCommentFormat.setForeground(Qt::red);
 

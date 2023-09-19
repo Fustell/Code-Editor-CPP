@@ -62,7 +62,10 @@ public:
         this->lineColor = val;
     }
 
+
     int getFirstVisibleBlockId();
+
+    QSet<int> breakpoints;
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -80,6 +83,8 @@ private slots:
 
 private:
     int tabStopWidth = 25;
+
+
     QWidget *lineNumberArea;
     QString currentFile;
     QCompleter *c = nullptr;
@@ -87,9 +92,7 @@ private:
     QColor lineColor = QColor(50, 50, 50, 255).lighter(160);
 
     QAbstractItemModel *modelFromFile(const QString& fileName);
-
     QString textUnderCursor() const;
-
 
 
 };
@@ -103,7 +106,7 @@ public:
         setMouseTracking(true);
         codeEditor->setFont(serifFont);
 
-        breakpoints.clear();
+        codeEditor->breakpoints.clear();
 
     }
 
@@ -111,23 +114,19 @@ public:
     {
         return QSize(codeEditor->lineNumberAreaWidth(), 0);
     }
-
     void addBreakpoint(int lineNumber)
     {
-        breakpoints.insert(lineNumber);
-        update(); // Redraw the widget to show the new breakpoint.
+        codeEditor->breakpoints.insert(lineNumber);
+        update();
     }
 
-    // Remove a breakpoint line.
     void removeBreakpoint(int lineNumber)
     {
-        breakpoints.remove(lineNumber);
-        update(); // Redraw the widget to remove the breakpoint.
+        codeEditor->breakpoints.remove(lineNumber);
+        update();
     }
-
 protected:
     CodeEditor *codeEditor;
-    QSet<int> breakpoints;
 
     void paintEvent(QPaintEvent *event) override
     {
@@ -163,7 +162,7 @@ protected:
         QPainter painter(this);
 
         while (block.isValid() && top <= event->rect().bottom()) {
-            if (block.isVisible() && bottom >= event->rect().top() && breakpoints.contains(blockNumber)) {
+            if (block.isVisible() && bottom >= event->rect().top() && codeEditor->breakpoints.contains(blockNumber)) {
                 painter.setPen(Qt::black);
                 painter.setBrush(Qt::red);
                 painter.drawEllipse(0, top+3, 9, 9);
@@ -180,14 +179,12 @@ protected:
         if (event->button() == Qt::LeftButton) {
             int lineNumber = codeEditor->cursorForPosition(event->pos()).blockNumber();
 
-            if (breakpoints.contains(lineNumber)) {
+            if (codeEditor->breakpoints.contains(lineNumber)) {
 
                 removeBreakpoint(lineNumber);
-                qDebug() << "Breakpoint removed from line" << lineNumber + 1;
             } else {
 
                 addBreakpoint(lineNumber);
-                qDebug() << "Breakpoint set on line" << lineNumber + 1;
             }
         }
     }

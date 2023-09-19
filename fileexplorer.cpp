@@ -2,8 +2,13 @@
 #include "codeeditor.h"
 
 void FileExplorer::updateFileTree() {
+    fileSystemWatcher->removePath(currentDirectory.absolutePath());\
+
     fileTreeWidget->clear();
+
     path->setText(currentDirectory.absolutePath());
+
+    fileSystemWatcher->addPath(currentDirectory.absolutePath());
 
     QFileInfoList fileInfoList = currentDirectory.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
 
@@ -23,6 +28,91 @@ void FileExplorer::updateFileTree() {
         }
     }
 }
+
+void FileExplorer::showContextMenu(const QPoint& pos)
+{
+    QMenu contextMenu(this);
+
+    QAction* createFolderAction = contextMenu.addAction("Create Folder");
+    QAction* createFileAction = contextMenu.addAction("Create File");
+    QAction* renameAction = contextMenu.addAction("Rename");
+    QAction* deleteAction = contextMenu.addAction("Delete");
+
+    // Add more actions for your specific needs here...
+
+    QAction* selectedItem = contextMenu.exec(fileTreeWidget->mapToGlobal(pos));
+     QList<QTreeWidgetItem*> selectedItems = fileTreeWidget->selectedItems();
+    if (selectedItem == createFolderAction) {
+        bool ok;
+        QString text = QInputDialog::getText(this, tr("Enter the name of folder"),
+                                             nullptr, QLineEdit::Normal,
+                                             nullptr, &ok);
+        if (ok && !text.isEmpty())
+        {
+
+            QDir dir(currentDirectory.absolutePath() +QDir::separator()+ text);
+            if(!dir.exists())
+            {
+                dir.mkdir(currentDirectory.absolutePath() +QDir::separator()+ text);
+            }
+        }
+    } else if (selectedItem == createFileAction) {
+        bool ok;
+        QString text = QInputDialog::getText(this, tr("Enter the name of file"),
+                                             nullptr, QLineEdit::Normal,
+                                             nullptr, &ok);
+
+        if (ok && !text.isEmpty())
+        {
+            QFile file(currentDirectory.absolutePath() +QDir::separator()+ text);
+            if(file.open(QIODevice::WriteOnly|QIODevice::Text)){}
+            file.close();
+        }
+    } else if (selectedItem == deleteAction) {
+        for (QTreeWidgetItem* item : selectedItems) {
+            QString filePath = item->data(0, Qt::UserRole).toString();
+            QFile file(filePath);
+            QDir directory(filePath);
+
+            if(directory.exists())
+            {
+             if (directory.removeRecursively()) delete item;
+            }else if(file.exists())
+            {
+             if (file.remove()) delete item;
+            }
+
+        }
+    }
+    else if (selectedItem == renameAction) {
+        for (QTreeWidgetItem* item : selectedItems) {
+            QString filePath = item->data(0, Qt::UserRole).toString();
+            QFile file(filePath);
+            QDir directory(filePath);
+
+            bool ok;
+            QString text = QInputDialog::getText(this, tr("Enter the name of folder"),
+                                                 nullptr, QLineEdit::Normal,
+                                                 nullptr, &ok);
+            if (ok && !text.isEmpty())
+            {
+                 if(directory.exists())
+                 {
+                    directory.rename(filePath, currentDirectory.absolutePath() +QDir::separator()+ text);
+                     delete item;
+                 }else if(file.exists())
+                 {
+                     QFile::rename(filePath, currentDirectory.absolutePath() +QDir::separator()+ text);
+                     delete item;
+                 }
+            }
+
+
+        }
+    }
+
+}
+
 
 FileExplorer::FileExplorer(QWidget *parent) : QWidget(parent) {
 
@@ -78,6 +168,12 @@ void FileExplorer::SetUpDir(QString absolutPath)
     layout->addLayout(buttonsLayout);
     fileTreeWidget = new QTreeWidget(this);
     layout->addWidget(fileTreeWidget);
+    fileTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(fileTreeWidget, &QTreeWidget::customContextMenuRequested, this, &FileExplorer::showContextMenu);
+
+    fileSystemWatcher = new QFileSystemWatcher(this);
+    connect(fileSystemWatcher, &QFileSystemWatcher::directoryChanged, this, &FileExplorer::updateFileTree);
+
 
     fileTreeWidget->setHeaderLabels(QStringList() << "File Explorer");
 
