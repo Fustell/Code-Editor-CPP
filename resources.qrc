@@ -1,12 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>icons/c.png</file>
-        <file>icons/cpp.png</file>
-        <file>icons/empty.png</file>
-        <file>icons/folder.png</file>
-        <file>icons/h.png</file>
-        <file>icons/hpp.png</file>
-        <file>icons/txt.png</file>
         <file>resources/wordlist.txt</file>
     </qresource>
 </RCC>

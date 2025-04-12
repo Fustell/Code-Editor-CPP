@@ -61,7 +61,7 @@ void MainWindow::on_actionExit_triggered()
 void MainWindow::on_actionOpen_file_triggered()
 {
 
-    QString fileName = QFileDialog::getOpenFileName(this, "Open file",QDir::homePath());
+    QString fileName = QFileDialog::getOpenFileName(this, "Open file",QDir::homePath(), tr("C/C++ (*.c *.cpp *.h *hpp)"));
     QFile file(fileName);
 
     if (!file.open(QIODevice::ReadOnly | QFile::Text)) {
