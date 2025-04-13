@@ -1,4 +1,4 @@
-#include "codeeditor.h"
+#include "core/codeeditor.h"
 
 CodeEditor::~CodeEditor()
 {

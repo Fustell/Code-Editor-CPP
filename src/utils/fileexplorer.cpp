@@ -1,5 +1,5 @@
-#include "fileexplorer.h"
-#include "codeeditor.h"
+#include "utils/fileexplorer.h"
+#include "core/codeeditor.h"
 
 void FileExplorer::updateFileTree() {
     fileSystemWatcher->removePath(currentDirectory.absolutePath());\

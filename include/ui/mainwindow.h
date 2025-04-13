@@ -12,7 +12,7 @@
 #include <QFileSystemModel>
 #include <QCompleter>
 
-#include "codeeditor.h"
+#include "core/codeeditor.h"
 
 
 QT_BEGIN_NAMESPACE

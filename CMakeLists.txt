@@ -12,45 +12,50 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
-set(PROJECT_SOURCES
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
 
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
+set(SOURCES
+    src/main.cpp
+
+    src/core/codeeditor.cpp
+    src/core/highlighter.cpp
+
+    src/ui/fileexplorer.ui
+    src/ui/mainwindow.ui
+    src/ui/mainwindow.cpp
+
+    src/utils/fileexplorer.cpp
+
+    resources.qrc
+)
+
+set(HEADERS
+    include/core/codeeditor.h
+    include/core/highlighter.h
+
+    include/ui/mainwindow.h
+
+    include/utils/fileexplorer.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(IDE
         MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-        codeeditor.h codeeditor.cpp
-        highlighter.h highlighter.cpp
-        fileexplorer.h fileexplorer.cpp
-        resources.qrc
-        main.cpp
-
-
-
-
-
-
-
-
+        ${SOURCES}
+        ${HEADERS}
     )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET IDE APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
     if(ANDROID)
         add_library(IDE SHARED
-            ${PROJECT_SOURCES}
+            ${SOURCES}
+            ${HEADERS}
         )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
         add_executable(IDE
-            ${PROJECT_SOURCES}
+            ${SOURCES}
+            ${HEADERS}
         )
     endif()
 endif()

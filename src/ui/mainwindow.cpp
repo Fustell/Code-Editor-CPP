@@ -1,6 +1,6 @@
-#include "mainwindow.h"
+#include "ui/mainwindow.h"
 #include "ui_mainwindow.h"
-#include "fileexplorer.h"
+#include "utils/fileexplorer.h"
 #include <Windows.h>
 
 #define programName "Code Editor C/C++"

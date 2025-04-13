@@ -1,4 +1,4 @@
-#include "highlighter.h"
+#include "core/highlighter.h"
 
 Highlighter::Highlighter(QTextDocument *parent)
     : QSyntaxHighlighter(parent)
