@@ -56,6 +56,10 @@ void CodeEditor::setCompleter(QCompleter *completer)
                      this, &CodeEditor::insertCompletion);
 }
 
+QString CodeEditor::getCurrentFile() const {
+    return m_currentFilePath;
+}
+
 QAbstractItemModel *CodeEditor::modelFromFile(const QString& fileName)
 {
     QFile file(fileName);
@@ -187,20 +191,7 @@ void CodeEditor::updateLineNumberAreaWidth(int /* newBlockCount */)
 
 void CodeEditor::updateLineNumberArea()
 {
-    /*
-     * When the signal is emitted, the sliderPosition has been adjusted according to the action,
-     * but the value has not yet been propagated (meaning the valueChanged() signal was not yet emitted),
-     * and the visual display has not been updated. In slots connected to this signal you can thus safely
-     * adjust any action by calling setSliderPosition() yourself, based on both the action and the
-     * slider's value.
-     */
-    // Make sure the sliderPosition triggers one last time the valueChanged() signal with the actual value !!!!
     this->verticalScrollBar()->setSliderPosition(this->verticalScrollBar()->sliderPosition());
-
-    // Since "QTextEdit" does not have an "updateRequest(...)" signal, we chose
-    // to grab the imformations from "sliderPosition()" and "contentsRect()".
-    // See the necessary connections used (Class constructor implementation part).
-
     QRect rect =  this->contentsRect();
     lineNumberArea->update(0, rect.y(), lineNumberArea->width(), rect.height());
     updateLineNumberAreaWidth(0);
@@ -210,7 +201,6 @@ void CodeEditor::updateLineNumberArea()
         lineNumberArea->scroll(0, dy);
     }
 
-    // Addjust slider to alway see the number of the currently being edited line...
     int first_block_id = getFirstVisibleBlockId();
     if (first_block_id == 0 || this->textCursor().block().blockNumber() == first_block_id-1)
         this->verticalScrollBar()->setSliderPosition(dy-this->document()->documentMargin());
@@ -254,11 +244,6 @@ void CodeEditor::highlightCurrentLine()
 
 int CodeEditor::getFirstVisibleBlockId()
 {
-    // Detect the first block for which bounding rect - once translated
-    // in absolute coordinated - is contained by the editor's text area
-
-    // Costly way of doing but since "blockBoundingGeometry(...)" doesn't
-    // exists for "QTextEdit"...
 
     QTextCursor curs = QTextCursor(this->document());
     curs.movePosition(QTextCursor::Start);
@@ -297,22 +282,17 @@ void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
 
     int top = this->viewport()->geometry().top();
 
-    // Adjust text position according to the previous "non entirely visible" block
-    // if applicable. Also takes in consideration the document's margin offset.
     int additional_margin;
     if (blockNumber == 0)
     {
-        // Simply adjust to document's margin
         additional_margin = (int) this->document()->documentMargin() -1 - this->verticalScrollBar()->sliderPosition();
     }
     else
     {
-        // Getting the height of the visible part of the previous "non entirely visible" block
         additional_margin = (int) this->document()->documentLayout()->blockBoundingRect(prev_block)
                                 .translated(0, translate_y).intersected(this->viewport()->geometry()).height();
     }
 
-    // Shift the starting point
     top += additional_margin;
 
     int bottom = top + (int) this->document()->documentLayout()->blockBoundingRect(block).height();

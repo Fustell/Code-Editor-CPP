@@ -28,6 +28,8 @@ public:
     explicit CodeEditor(QString filePath="",QWidget *parent = nullptr);
     ~CodeEditor();
 
+    QString getCurrentFile() const;
+
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth();
     void setCompleter(QCompleter *c);
@@ -38,9 +40,9 @@ public:
     {
         return this->currentFile;
     }
-    void SetCurrentFile(QString file)
+    void SetCurrentFile(const QString &filePath)
     {
-        this->currentFile = file;
+        m_currentFilePath  = filePath;
     }
 
     int GetTabStopWidth() const
@@ -83,7 +85,7 @@ private slots:
 
 private:
     int tabStopWidth = 25;
-
+    QString m_currentFilePath;
 
     QWidget *lineNumberArea;
     QString currentFile;

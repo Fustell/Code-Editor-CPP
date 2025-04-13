@@ -2,6 +2,11 @@
 #include "ui_mainwindow.h"
 #include "utils/fileexplorer.h"
 #include <Windows.h>
+#include <QMimeData>
+#include <QFileInfo>
+#include <QUrl>
+#include <QDragEnterEvent>
+#include <QDropEvent>
 
 #define programName "Code Editor C/C++"
 
@@ -46,7 +51,104 @@ MainWindow::MainWindow(QWidget *parent)
     QMainWindow::showMaximized();
 
     outputPrompt = ui->OutputTabWidget->findChild<QWidget*>("build")->findChild<QPlainTextEdit*>();
+    setAcceptDrops(true);
 }
+void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
+
+    if (event->mimeData()->hasUrls()) {
+        bool can_accept = false;
+        for (const QUrl &url : event->mimeData()->urls()) {
+            if (url.isLocalFile()) {
+                can_accept = true;
+                break;
+            }
+        }
+        if (can_accept) {
+            event->acceptProposedAction();
+        } else {
+            event->ignore();
+        }
+    } else {
+        event->ignore();
+    }
+}
+
+void MainWindow::openFileInNewTab(const QString &filePath)
+{
+    if (filePath.isEmpty()) {
+        qWarning() << "Attempted to open an empty file path.";
+        return;
+    }
+
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QFile::Text)) {
+        qWarning() << "Could not open file:" << filePath << " Error:" << file.errorString();
+        return;
+    }
+
+    QTextStream in(&file);
+    QString text = "";
+    text = in.readAll();
+    file.close();
+
+    QFileInfo fileInfo(filePath);
+    QString shortFilename = fileInfo.fileName();
+
+    for (int i = 0; i < ui->tabWidget->count(); ++i) {
+        CodeEditor* editor = qobject_cast<CodeEditor*>(ui->tabWidget->widget(i));
+        if (editor && editor->getCurrentFile() == filePath) {
+            ui->tabWidget->setCurrentIndex(i);
+            qDebug() << "File already open, switching to tab:" << filePath;
+            return;
+        }
+    }
+
+    CodeEditor* newTab = new CodeEditor(filePath);
+    newTab->setPlainText(text);
+
+    int newIndex = ui->tabWidget->addTab(newTab, shortFilename);
+    ui->tabWidget->setCurrentIndex(newIndex);
+
+    ui->tabWidget->setTabToolTip(newIndex, filePath);
+
+    qDebug() << "Successfully opened file in new tab:" << filePath;
+
+}
+
+void MainWindow::dropEvent(QDropEvent *event) {
+    const QMimeData *mimeData = event->mimeData();
+
+    if (mimeData->hasUrls()) {
+        QList<QUrl> urlList = mimeData->urls();
+        bool accepted_at_least_one = false;
+
+        for (const QUrl &url : urlList) {
+            if (url.isLocalFile()) {
+                QString filePath = url.toLocalFile();
+                QFileInfo fileInfo(filePath);
+
+                if (fileInfo.isFile()) {
+                    qDebug() << "Attempting to open dropped file:" << filePath;
+                    openFileInNewTab(filePath);
+
+                    accepted_at_least_one = true;
+                } else {
+                    qWarning() << "Ignoring dropped directory:" << filePath;
+                }
+            }
+        }
+
+        if (accepted_at_least_one) {
+            event->acceptProposedAction();
+        } else {
+            event->ignore();
+        }
+    } else {
+        event->ignore();
+    }
+}
+
+
 
 MainWindow::~MainWindow()
 {
@@ -60,41 +162,11 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_actionOpen_file_triggered()
 {
+    QString fileName = QFileDialog::getOpenFileName(this, "Open file", QDir::homePath(), tr("C/C++ (*.c *.cpp *.h *hpp)"));
 
-    QString fileName = QFileDialog::getOpenFileName(this, "Open file",QDir::homePath(), tr("C/C++ (*.c *.cpp *.h *hpp)"));
-    QFile file(fileName);
-
-    if (!file.open(QIODevice::ReadOnly | QFile::Text)) {
-        return;
+    if (!fileName.isEmpty()) {
+        openFileInNewTab(fileName);
     }
-
-    QTextStream in(&file);
-    QString text = in.readAll();
-
-    QFileInfo fileInfo(file.fileName());
-    QString filename(fileInfo.fileName());
-
-    CodeEditor* newTab = new CodeEditor(fileName);
-    newTab->setPlainText(text);
-
-    ui->tabWidget->addTab(newTab, filename);
-    ui->tabWidget->setCurrentIndex(ui->tabWidget->count()-1);
-
-    newTab->SetCurrentFile(fileName);
-    file.close();
-
-
-    QString absolutPath = fileInfo.absoluteDir().absolutePath();
-
-    auto layout = new QVBoxLayout();
-    FileExplorer* fileExplorer = new FileExplorer();
-    fileExplorer->SetUpDir(absolutPath);
-
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
-    layout->addWidget(fileExplorer);
-    ui->fileExplorerFrame->setLayout(layout);
-
 }
 
 void MainWindow::on_actionNew_file_triggered()
@@ -202,7 +274,7 @@ void MainWindow::CompileCpp(CodeEditor *currentTab, QFileInfo fileInfo)
     compilerProcess.waitForStarted();
 
     while (compilerProcess.state() == QProcess::Running) {
-        QCoreApplication::processEvents(); // Process pending events to update the UI
+        QCoreApplication::processEvents();
     }
 
     compilerProcess.waitForFinished();

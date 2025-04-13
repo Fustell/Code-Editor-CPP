@@ -38,7 +38,6 @@ void FileExplorer::showContextMenu(const QPoint& pos)
     QAction* renameAction = contextMenu.addAction("Rename");
     QAction* deleteAction = contextMenu.addAction("Delete");
 
-    // Add more actions for your specific needs here...
 
     QAction* selectedItem = contextMenu.exec(fileTreeWidget->mapToGlobal(pos));
      QList<QTreeWidgetItem*> selectedItems = fileTreeWidget->selectedItems();

@@ -1,5 +1,4 @@
 <RCC>
-    <qresource prefix="/">
-        <file>resources/wordlist.txt</file>
-    </qresource>
-</RCC>
+    <qresource prefix="/styles">  <file>resources/themes/dark.qss</file>   </qresource>
+    <qresource prefix="/icons">  <file>resources/icons/close.svg</file>   </qresource>
+    </RCC>

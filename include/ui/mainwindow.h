@@ -27,6 +27,7 @@ public:
 
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    void openFileInNewTab(const QString &filePath);
 
     bool hasCppCompiler()
     {
@@ -39,6 +40,10 @@ public:
     }
 
     void CompileCpp(CodeEditor *currentTab, QFileInfo fileInfo);
+
+protected:
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
 
 private slots:
 
